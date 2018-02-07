@@ -47,6 +47,6 @@ Temporary Items
 .apdisk
 
 # Project-specific paths
-.Debug
-.Release
-.x64
+/Debug/
+/Release/
+/x64/
