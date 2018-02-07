@@ -10,6 +10,8 @@
 
 #include <Rendering\Mesh.h>
 #include <Rendering\Materials\DiscoMat.h>
+#include <Rendering\Materials\LitColourMat.h>
+#include <Rendering\Materials\LitTexturedMat.h>
 #include <Rendering\Materials\SolidColourMat.h>
 #include <Rendering\Materials\UnlitTexturedMat.h>
 
@@ -35,11 +37,11 @@ namespace snes
 		m_camera->GetTransform().SetLocalPosition(glm::vec3(0, -4.0f, 18.0f));
 		m_camera->GetTransform().SetLocalRotation(glm::vec3(-29.4f, 270.0f, 0.0f));
 
-		std::shared_ptr<SolidColourMat> redMat = std::make_shared<SolidColourMat>();
+		std::shared_ptr<LitColourMat> redMat = std::make_shared<LitColourMat>();
 		redMat->SetColour(glm::vec3(1.0f, 0.0f, 0.0f));
 		std::shared_ptr<DiscoMat> discoMat = std::make_shared<DiscoMat>();
 		std::shared_ptr<UnlitTexturedMat> texturedMat = std::make_shared<UnlitTexturedMat>();
-		texturedMat->SetTexture("Jiggy.bmp");
+		texturedMat->SetTexture("Models/Jiggy.bmp");
 
 		CreateJiggy(glm::vec3(15, 0, 0), camera.lock(), redMat);
 		CreateJiggy(glm::vec3(-15, 0, 0), camera.lock(), discoMat);
@@ -125,12 +127,12 @@ namespace snes
 
 		// Make it render
 		auto& meshRenderer = jiggy->AddComponent<MeshRenderer>().lock();
-		meshRenderer->SetMesh("Jiggy.obj");
+		meshRenderer->SetMesh("Models/Jiggy.obj");
 		meshRenderer->SetCamera(camera);
 		meshRenderer->SetMaterial(material);
 
 		// Add Rigidbody and collider
-		//jiggy->AddComponent<Rigidbody>();
+		jiggy->AddComponent<Rigidbody>();
 		jiggy->AddComponent<AABBCollider>();
 		// TestComponent makes an object spin
 		jiggy->AddComponent<TestComponent>();
@@ -151,15 +153,6 @@ namespace snes
 		link->GetTransform().SetLocalPosition(pos);
 		link->GetTransform().SetLocalScale(glm::vec3(0.1f, 0.1f, 0.1f));
 
-		// Make it render
-		//auto& meshRenderer = link->AddComponent<MeshRenderer>().lock();
-		//meshRenderer->SetMesh("charizard.obj");
-		//meshRenderer->SetCamera(camera);
-
-		//std::shared_ptr<UnlitTexturedMat> texMat = std::make_shared<UnlitTexturedMat>();
-		//texMat->SetTexture("charizard.png");
-		//meshRenderer->SetMaterial(texMat);
-
 		auto& lodModel = link->AddComponent<LODModel>().lock();
 		lodModel->SetCamera(camera);
 		lodModel->Load("Models/charizard");
@@ -167,6 +160,7 @@ namespace snes
 		// Add Rigidbody and collider
 		link->AddComponent<Rigidbody>();
 		link->AddComponent<AABBCollider>();
+
 		// Add character controller component
 		link->AddComponent<CharController>();
 
@@ -180,11 +174,11 @@ namespace snes
 		floor->GetTransform().SetLocalScale(glm::vec3(100.0f, 0.5f, 100.0f));
 
 		auto meshRenderer = floor->AddComponent<MeshRenderer>().lock();
-		meshRenderer->SetMesh("cube.obj");
+		meshRenderer->SetMesh("Models/cube.obj");
 		meshRenderer->SetCamera(camera);
 
-		std::shared_ptr<UnlitTexturedMat> floorMat = std::make_shared<UnlitTexturedMat>();
-		floorMat->SetTexture("cube.bmp");
+		std::shared_ptr<LitTexturedMat> floorMat = std::make_shared<LitTexturedMat>();
+		floorMat->SetTexture("Models/cube.bmp");
 		meshRenderer->SetMaterial(floorMat);
 
 		auto rb = floor->AddComponent<Rigidbody>().lock();

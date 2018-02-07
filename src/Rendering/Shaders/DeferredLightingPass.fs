@@ -7,6 +7,7 @@ out vec4 fragColour;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
+uniform sampler2D gEmissive;
 
 struct PointLight
 {
@@ -28,10 +29,11 @@ void main()
     vec3 fragPos = texture(gPosition, texCoord).rgb;
     vec3 normal = texture(gNormal, texCoord).rgb;
     vec3 albedo = texture(gAlbedoSpec, texCoord).rgb;
+    vec3 emissive = texture(gEmissive, texCoord).rgb;
     float specularAmount = texture(gAlbedoSpec, texCoord).a;
     
     // then calculate lighting as usual
-    vec3 lighting  = albedo * AMBIENT; // hard-coded ambient component
+    vec3 lighting  = albedo * AMBIENT + emissive;
     vec3 viewDir  = normalize(viewPos - fragPos);
     for(int i = 0; i < MAX_POINT_LIGHTS; ++i)
     {

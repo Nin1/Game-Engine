@@ -83,6 +83,10 @@ namespace snes
 			return "src/rendering/shaders/SolidColour";
 		case UNLIT_TEXTURED:
 			return "src/rendering/shaders/UnlitTextured";
+		case LIT_COLOUR:
+			return "src/rendering/shaders/LitColour";
+		case LIT_TEXTURED:
+			return "src/rendering/shaders/LitTextured";
 		case DEFERRED_MODEL:
 			return "src/rendering/shaders/DeferredModel";
 		case DEFERRED_LIGHTING_PASS:
@@ -173,7 +177,7 @@ namespace snes
 			getchar();
 			return 0;
 		}
-		std::cout << shader << std::endl;
+		//std::cout << shader << std::endl;
 		return shader;
 	}
 

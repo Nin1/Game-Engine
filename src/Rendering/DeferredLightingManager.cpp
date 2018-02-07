@@ -20,6 +20,7 @@ namespace snes
 		m_shader.SetGlUniformSampler2D("gPosition", 0);
 		m_shader.SetGlUniformSampler2D("gNormal", 1);
 		m_shader.SetGlUniformSampler2D("gAlbedoSpec", 2);
+		m_shader.SetGlUniformSampler2D("gEmissive", 3);
 
 		uint screenWidth, screenHeight;
 		Application::GetScreenSize(screenWidth, screenHeight);
@@ -51,8 +52,16 @@ namespace snes
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_albedoSpecular, 0);
 
-		GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-		glDrawBuffers(3, attachments);
+		// Set up render flags buffer (bit 0 = "UseLighting")
+		glGenTextures(1, &m_emissive);
+		glBindTexture(GL_TEXTURE_2D, m_emissive);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_emissive, 0);
+
+		GLuint attachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+		glDrawBuffers(4, attachments);
 
 		// Set up depth buffer
 		glGenRenderbuffers(1, &m_depth);
@@ -108,6 +117,8 @@ namespace snes
 		glBindTexture(GL_TEXTURE_2D, m_normal);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, m_albedoSpecular);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, m_emissive);
 
 		RenderQuad();
 	}

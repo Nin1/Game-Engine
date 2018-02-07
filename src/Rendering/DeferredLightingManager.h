@@ -33,6 +33,7 @@ namespace snes
 		GLuint m_position;
 		GLuint m_normal;
 		GLuint m_albedoSpecular;
+		GLuint m_emissive;
 		uint m_depth;
 	};
 }

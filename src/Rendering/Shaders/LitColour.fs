@@ -2,13 +2,12 @@
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec3 gNormal;
 layout (location = 2) out vec4 gAlbedoSpec;
-layout (location = 3) out vec4 gEmissive;
+layout (location = 3) out vec3 gEmissive;
 
 in vec3 fragPos;
 in vec3 vNormal;
-in vec2 texCoord;
 
-uniform sampler2D tex1;
+uniform vec3 colour;
 
 void main()
 {
@@ -16,10 +15,10 @@ void main()
 	gPosition = fragPos;
 	// Fragment normal
 	gNormal = vNormal;
-	// Albedo (texture colour)
-	gAlbedoSpec.rgb = vec3(0.0, 0.0, 0.0);
+	// Albedo (colour)
+	gAlbedoSpec.rgb = colour;
 	// Specular intensity
-	gAlbedoSpec.a = 0.0;
+	gAlbedoSpec.a = 0.5;
 	// Emissive
-	gEmissive.rgb = texture(tex1, texCoord).rgb;
+	gEmissive = vec3(0.0, 0.0, 0.0);
 }

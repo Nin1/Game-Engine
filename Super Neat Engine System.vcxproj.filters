@@ -120,6 +120,12 @@
     <ClInclude Include="src\Components\LODModel.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
+    <ClInclude Include="src\Rendering\Materials\LitColourMat.h">
+      <Filter>Header Files\Rendering\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Materials\LitTexturedMat.h">
+      <Filter>Header Files\Rendering\Materials</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
@@ -202,6 +208,12 @@
     </ClCompile>
     <ClCompile Include="src\Components\LODModel.cpp">
       <Filter>Source Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Materials\LitColourMat.cpp">
+      <Filter>Source Files\Rendering\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Materials\LitTexturedMat.cpp">
+      <Filter>Source Files\Rendering\Materials</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

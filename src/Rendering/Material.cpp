@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Material.h"
 #include "Materials/DiscoMat.h"
+#include "Materials/LitColourMat.h"
+#include "Materials/LitTexturedMat.h"
 #include "Materials/SolidColourMat.h"
 #include "Materials/UnlitTexturedMat.h"
 #include <fstream>
@@ -54,9 +56,17 @@ namespace snes
 		{
 			material = std::make_shared<SolidColourMat>(params);
 		}
+		else if (line == "LIT_COLOUR")
+		{
+			material = std::make_shared<LitColourMat>(params);
+		}
 		else if (line == "UNLIT_TEXTURED")
 		{
 			material = std::make_shared<UnlitTexturedMat>(params);
+		}
+		else if (line == "LIT_TEXTURED")
+		{
+			material = std::make_shared<LitTexturedMat>(params);
 		}
 		else if (line == "DISCO")
 		{
