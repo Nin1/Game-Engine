@@ -16,13 +16,17 @@ namespace snes
 		void SetCameraControl(bool on) { m_cameraControl = on; }
 
 		/** @return the projection matrix for this camera */
-		glm::mat4 GetProjMatrix();
+		glm::mat4 GetProjMatrix() { return m_projMatrix; }
 		/** @return the view matrix for this camera */
-		glm::mat4 GetViewMatrix();
+		glm::mat4 GetViewMatrix() { return m_viewMatrix; }
 
 	private:
 		/** @return the direction the camera is facing in euler angles */
 		glm::vec3 GetCameraDirection();
+		/** Calculate and store the current projection matrix in m_projMatrix */
+		void CalculateCurrentProjMatrix();
+		/** Calculate and store the current view matrix in m_viewMatrix */
+		void CalculateCurrentViewMatrix();
 
 		bool m_cameraControl = false;
 
@@ -33,5 +37,8 @@ namespace snes
 		float m_xSensitivity = 0.5f;
 		float m_ySensitivity = 0.3f;
 		float m_moveSpeed = 20.0f;
+
+		glm::mat4 m_projMatrix;
+		glm::mat4 m_viewMatrix;
 	};
 }

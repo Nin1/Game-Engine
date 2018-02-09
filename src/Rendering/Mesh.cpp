@@ -10,6 +10,7 @@
 namespace snes
 {
 	std::map<std::string, std::shared_ptr<Mesh>> Mesh::m_loadedMeshes;
+	uint Mesh::m_verticesRendered = 0;
 
 	Mesh::Mesh(const char* modelPath)
 	{
@@ -244,5 +245,12 @@ namespace snes
 	{
 		glBindVertexArray(m_vertexArrayID);
 		glBindBuffer(GL_ARRAY_BUFFER, m_vertexBufferID);
+		m_verticesRendered += m_vertices.size();
+	}
+
+	void Mesh::ResetRenderCount()
+	{
+		std::cout << "Vertices rendered: " << m_verticesRendered << std::endl;
+		m_verticesRendered = 0;
 	}
 }

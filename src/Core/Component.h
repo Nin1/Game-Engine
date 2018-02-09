@@ -36,7 +36,7 @@ namespace snes
 		virtual void OnCollision(GameObject& other) {};
 
 		/** @return this component's GameObject's transform */
-		const Transform& GetTransform() { return m_transform; }
+		Transform& GetTransform() { return m_transform; }
 
 	protected:
 		GameObject& m_gameObject;

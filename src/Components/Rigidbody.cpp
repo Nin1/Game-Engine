@@ -50,10 +50,14 @@ namespace snes
 	void Rigidbody::HandleCollision(GameObject& other)
 	{
 		std::shared_ptr<Rigidbody> otherRB = other.GetComponent<Rigidbody>();
+		if (!otherRB)
+		{
+			return;
+		}
 		std::shared_ptr<AABBCollider> thisCollider = m_gameObject.GetComponent<AABBCollider>();
 		std::shared_ptr<AABBCollider> otherCollider = other.GetComponent<AABBCollider>();
 
-		if (!otherRB || !thisCollider || !otherCollider)
+		if (!thisCollider || !otherCollider)
 		{
 			return;
 		}

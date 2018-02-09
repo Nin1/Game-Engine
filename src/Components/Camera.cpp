@@ -6,19 +6,17 @@
 
 namespace snes
 {
-	glm::mat4 Camera::GetProjMatrix()
+	void Camera::CalculateCurrentProjMatrix()
 	{
-		// @TODO: Store this at the start of each frame
 		auto fov = glm::radians(m_fieldOfView);
-		return glm::perspective(fov, 800.0f / 600.0f, m_nearClipPlane, m_farClipPlane);
+		m_projMatrix = glm::perspective(fov, 800.0f / 600.0f, m_nearClipPlane, m_farClipPlane);
 	}
 
-	glm::mat4 Camera::GetViewMatrix()
+	void Camera::CalculateCurrentViewMatrix()
 	{
 		const glm::vec3& cameraPosition = m_transform.GetWorldPosition();
 
-		// @TODO: Store this at the start of each frame
-		return glm::lookAt(
+		m_viewMatrix = glm::lookAt(
 			cameraPosition,						// Camera position
 			cameraPosition + GetCameraDirection(),	// Camera "look-at" point
 			glm::vec3(0, 1, 0)					// Up vector
@@ -91,5 +89,9 @@ namespace snes
 				Input::WarpMousePos(400, 300);
 			}
 		}
+
+		/** Calculate the view/proj matrices this frame */
+		CalculateCurrentProjMatrix();
+		CalculateCurrentViewMatrix();
 	}
 }

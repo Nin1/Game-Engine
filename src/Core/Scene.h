@@ -23,6 +23,7 @@ namespace snes
 	private:
 		GameObject& CreateJiggy(glm::vec3 pos, std::shared_ptr<Camera> camera, std::shared_ptr<Material> material);
 		GameObject& CreateLink(glm::vec3 pos, std::shared_ptr<Camera> camera);
+		GameObject& CreateSphere(glm::vec3 pos, std::shared_ptr<Camera> camera);
 		GameObject& CreateFloor(std::shared_ptr<Camera> camera);
 		GameObject& CreatePointLight(GameObject& parent, glm::vec3 pos, glm::vec3 colour);
 

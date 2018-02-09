@@ -18,7 +18,7 @@ namespace snes
 		/** Set up a new rendering fram */
 		void PrepareNewFrame();
 		/** Render the contents of the framebuffer, lit by the pointlights */
-		void RenderLighting(const Transform& camera, std::vector<std::weak_ptr<PointLight>> pointLights);
+		void RenderLighting(Transform& camera, std::vector<std::weak_ptr<PointLight>> pointLights);
 
 	private:
 		/** Render a quad to the screen */

@@ -72,6 +72,10 @@ namespace snes
 		{
 			material = std::make_shared<DiscoMat>(params);
 		}
+		else
+		{
+			material = std::make_shared<SolidColourMat>();
+		}
 
 		params.close();
 

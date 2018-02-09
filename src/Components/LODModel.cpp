@@ -4,6 +4,7 @@
 #include <Core\GameObject.h>
 #include <GL/glew.h>
 #include <glm/gtx/euler_angles.hpp>
+#include <algorithm>
 #include <fstream>
 
 namespace snes
@@ -53,18 +54,18 @@ namespace snes
 
 	int LODModel::GetCurrentLOD() const
 	{
-		if (m_meshes.size() == 0)
+		if (m_meshes.size() == 0 || m_camera.expired())
 		{
 			return -1;
 		}
 
 		// Use heuristics to determine the best mesh to show
-		int lodToShow = 0;
+		float distanceToCamera = glm::length(m_transform.GetWorldPosition() - m_camera.lock()->GetTransform().GetWorldPosition());
+		float distancePerLOD = (m_distanceLow - m_distanceHigh) / m_meshes.size();
 
-		if (m_transform.GetWorldPosition().z < 0)
-		{
-			lodToShow = m_meshes.size() - 1;
-		}
+		uint lodToShow = (uint)std::abs((distanceToCamera + m_distanceHigh) / distancePerLOD);
+		lodToShow = std::max(lodToShow, (uint)0);
+		lodToShow = std::min(lodToShow, (m_meshes.size() - 1));
 
 		// Return that mesh
 		return lodToShow;

@@ -37,17 +37,23 @@ namespace snes
 		m_camera->GetTransform().SetLocalPosition(glm::vec3(0, -4.0f, 18.0f));
 		m_camera->GetTransform().SetLocalRotation(glm::vec3(-29.4f, 270.0f, 0.0f));
 
-		std::shared_ptr<LitColourMat> redMat = std::make_shared<LitColourMat>();
-		redMat->SetColour(glm::vec3(1.0f, 0.0f, 0.0f));
 		std::shared_ptr<DiscoMat> discoMat = std::make_shared<DiscoMat>();
 		std::shared_ptr<UnlitTexturedMat> texturedMat = std::make_shared<UnlitTexturedMat>();
 		texturedMat->SetTexture("Models/Jiggy.bmp");
 
-		CreateJiggy(glm::vec3(15, 0, 0), camera.lock(), redMat);
+		CreateJiggy(glm::vec3(15, 0, 0), camera.lock(), discoMat);
 		CreateJiggy(glm::vec3(-15, 0, 0), camera.lock(), discoMat);
 		CreateJiggy(glm::vec3(0, 0, 15), camera.lock(), texturedMat);
 		CreateLink(glm::vec3(0, 0, -15), camera.lock());
 		CreateFloor(camera.lock());
+		// Create a ton of spheres
+		for (int i = -25; i < 25; i++)
+		{
+			for (int j = -25; j < 25; j++)
+			{
+				CreateSphere(glm::vec3(i*2, -5, j*2), camera.lock());
+			}
+		}
 		// Create a bunch of pretty lights on the floor
 		CreatePointLight(*m_root, glm::vec3(10, -8, 0), glm::vec3(1, 0, 1));
 		CreatePointLight(*m_root, glm::vec3(-10, -8, 0), glm::vec3(1, 1, 0));
@@ -83,10 +89,9 @@ namespace snes
 
 			for (uint j = (i + 1); j < allObjects.size(); j++)
 			{
-				auto currentTarget = allObjects.at(j).lock();
-				if (currentTarget)
+				if (!allObjects.at(j).expired())
 				{ 
-					rigidbody->HandleCollision(*currentTarget);
+					rigidbody->HandleCollision(*allObjects.at(j).lock());
 				}
 			}
 
@@ -103,6 +108,8 @@ namespace snes
 
 		// Render deferred lighting
 		m_deferredLightingMgr.RenderLighting(m_camera->GetTransform(), m_pointLights);
+
+		Mesh::ResetRenderCount();
 	}
 
 	GameObject& Scene::CreatePointLight(GameObject& parent, glm::vec3 pos, glm::vec3 colour)
@@ -146,6 +153,24 @@ namespace snes
 		return *jiggy;
 	}
 
+	GameObject& Scene::CreateSphere(glm::vec3 pos, std::shared_ptr<Camera> camera)
+	{
+		// Create the test jiggy
+		auto sphere = m_root->AddChild().lock();
+		sphere->GetTransform().SetLocalPosition(pos);
+		sphere->GetTransform().SetLocalScale(glm::vec3(0.1f, 0.1f, 0.1f));
+
+		auto& lodModel = sphere->AddComponent<LODModel>().lock();
+		lodModel->SetCamera(camera);
+		lodModel->Load("Models/sphere");
+
+		// Add Rigidbody and collider
+		//sphere->AddComponent<Rigidbody>();
+		//sphere->AddComponent<AABBCollider>();
+
+		return *sphere;
+	}
+
 	GameObject& Scene::CreateLink(glm::vec3 pos, std::shared_ptr<Camera> camera)
 	{
 		// Create the test jiggy
@@ -155,7 +180,7 @@ namespace snes
 
 		auto& lodModel = link->AddComponent<LODModel>().lock();
 		lodModel->SetCamera(camera);
-		lodModel->Load("Models/charizard");
+		lodModel->Load("Models/sphere");
 
 		// Add Rigidbody and collider
 		link->AddComponent<Rigidbody>();
@@ -163,6 +188,8 @@ namespace snes
 
 		// Add character controller component
 		link->AddComponent<CharController>();
+
+		CreatePointLight(*link, glm::vec3(0.0f), glm::vec3(1.0f));
 
 		return *link;
 	}

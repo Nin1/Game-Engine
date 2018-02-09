@@ -83,7 +83,7 @@ namespace snes
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void DeferredLightingManager::RenderLighting(const Transform& camera, std::vector<std::weak_ptr<PointLight>> pointLights)
+	void DeferredLightingManager::RenderLighting(Transform& camera, std::vector<std::weak_ptr<PointLight>> pointLights)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glUseProgram(m_shader.GetProgramID()); 

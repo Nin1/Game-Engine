@@ -25,7 +25,7 @@ namespace snes
 		int GetCurrentLOD() const;
 
 		const std::weak_ptr<Mesh> GetMesh(uint lodLevel) const;
-		
+
 	private:
 		/** Calculate the model/view/proj matrices and apply them to the material */
 		void PrepareTransformUniforms(Camera& camera, Material& mat);
@@ -38,5 +38,10 @@ namespace snes
 		  * e.g. m_meshes[0] = LOD0 = highest detail */
 		std::vector<std::shared_ptr<Mesh>> m_meshes;
 		std::vector<std::shared_ptr<Material>> m_materials;
+
+		/** Distance from camera that the lowest LOD is used */
+		float m_distanceLow = 100;
+		/** Distance from camera that the highest LOD is used */
+		float m_distanceHigh = 10;
 	};
 }

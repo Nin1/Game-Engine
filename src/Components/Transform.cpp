@@ -20,26 +20,33 @@ namespace snes
 
 	void Transform::Rotate(glm::vec3 rotation)
 	{
-		m_localRotation += rotation;
+		m_localRotation += rotation; m_dirtyTRS = true;
 	}
 
-	glm::mat4 Transform::GetTRS() const
+	glm::mat4 Transform::GetTRS()
 	{
-		glm::mat4 scale = glm::scale(glm::mat4(1.0f), m_localScale);
-		glm::mat4 translate = glm::translate(glm::mat4(1.0f), m_localPosition);
-		glm::vec3 eulerAngles = m_localRotation / (180.0f / 3.14159f);
-		glm::mat4 eulerRotation = glm::eulerAngleYXZ(eulerAngles.y, eulerAngles.x, eulerAngles.z);
-
-		auto parent = m_gameObject.GetParent();
-		if (parent)
+		if (m_dirtyTRS)
 		{
-			return parent->GetTransform().GetTRS() * translate * eulerRotation * scale;
-		}
+			glm::mat4 scale = glm::scale(glm::mat4(1.0f), m_localScale);
+			glm::mat4 translate = glm::translate(glm::mat4(1.0f), m_localPosition);
+			glm::vec3 eulerAngles = m_localRotation / (180.0f / 3.14159f);
+			glm::mat4 eulerRotation = glm::eulerAngleYXZ(eulerAngles.y, eulerAngles.x, eulerAngles.z);
 
-		return translate * eulerRotation * scale;
+			auto parent = m_gameObject.GetParent();
+			if (parent)
+			{
+				m_trs = parent->GetTransform().GetTRS() * translate * eulerRotation * scale;
+			}
+			else
+			{
+				m_trs = translate * eulerRotation * scale;
+			}
+			m_dirtyTRS = false;
+		}
+		return m_trs;
 	}
 
-	glm::vec3 Transform::GetWorldPosition() const
+	glm::vec3 Transform::GetWorldPosition()
 	{
 		// Get position in relation to translate/rotate/scale of parent(s)
 		return glm::vec3(GetTRS() * glm::vec4(1.0f));

@@ -27,8 +27,8 @@ namespace snes
 			{
 				allChildren.push_back(grandChild);
 			}
+			allChildren.push_back(child);
 		}
-		allChildren.push_back(shared_from_this());
 		return allChildren;
 	}
 

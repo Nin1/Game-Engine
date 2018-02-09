@@ -34,6 +34,9 @@ namespace snes
 		/** Returns the mesh data from the mesh at the given path */
 		static std::shared_ptr<Mesh> GetMesh(const char* modelPath);
 
+		/** Reset the number of vertices rendered this frame */
+		static void ResetRenderCount();
+
 	private:
 		Mesh(const char* modelPath);
 
@@ -42,6 +45,9 @@ namespace snes
 
 		/** Cache of all loaded meshes */
 		static std::map<std::string, std::shared_ptr<Mesh>> m_loadedMeshes;
+
+		/** The number of vertices rendered this frame */
+		static uint m_verticesRendered;
 
 	private:
 		uint GetFaceAttributeCount(std::string face);
