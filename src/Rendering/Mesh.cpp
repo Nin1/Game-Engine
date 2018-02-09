@@ -62,6 +62,17 @@ namespace snes
 				lineStream >> vert.x;
 				lineStream >> vert.y;
 				lineStream >> vert.z;
+
+				// Find biggest distance between any two vertices
+				for (const auto& vertex : tempVerts)
+				{
+					float dist = glm::length(vertex - vert);
+					if (dist > m_size)
+					{
+						m_size = dist;
+					}
+				}
+
 				tempVerts.push_back(vert);
 			}
 			if (mode == "vt")
@@ -160,6 +171,8 @@ namespace snes
 				glm::vec3 vertex = tempVerts[vertexIndex - 1];
 				m_vertices.push_back(vertex);
 			}
+
+			m_numFaces = m_vertices.size() / 3;
 		}
 
 
@@ -250,7 +263,7 @@ namespace snes
 
 	void Mesh::ResetRenderCount()
 	{
-		std::cout << "Vertices rendered: " << m_verticesRendered << std::endl;
+		//std::cout << "Vertices rendered: " << m_verticesRendered << std::endl;
 		m_verticesRendered = 0;
 	}
 }

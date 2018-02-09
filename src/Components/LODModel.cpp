@@ -9,6 +9,43 @@
 
 namespace snes
 {
+	std::vector<LODValue> LODModel::m_lodValues;
+	uint LODModel::m_instanceCount = 0;
+	float LODModel::m_totalCost = 0;
+
+	/** Quicksort algorithm used to sort the LODValues by value */
+	int Partition(std::vector<LODValue>& v, int lowIndex, int highIndex)
+	{
+		LODValue& pivot = v[highIndex];
+		int i = lowIndex - 1;
+
+		for (int j = lowIndex; j <= highIndex - 1; j++)
+		{
+			if (v[j].value > pivot.value)
+			{
+				i++;
+				// Swap i and j
+				LODValue swap = v[i];
+				v[i] = v[j];
+				v[j] = swap;
+			}
+		}
+		++i;
+		LODValue swap = v[i];
+		v[i] = v[highIndex];
+		v[highIndex] = swap;
+		return i;
+	}
+	void Quicksort(std::vector<LODValue>& v, int lowIndex, int highIndex)
+	{
+		if (lowIndex < highIndex)
+		{
+			int partitionIndex = Partition(v, lowIndex, highIndex);
+			Quicksort(v, lowIndex, partitionIndex - 1);
+			Quicksort(v, partitionIndex + 1, highIndex);
+		}
+	}
+
 	void LODModel::Load(std::string modelName)
 	{
 		// Load the .lod file for this model
@@ -50,6 +87,8 @@ namespace snes
 			std::cout << "Error: No LOD meshes loaded for model name " << modelName << std::endl;
 			return;
 		}
+
+		m_instanceCount += m_meshes.size();
 	}
 
 	int LODModel::GetCurrentLOD() const
@@ -71,6 +110,13 @@ namespace snes
 		return lodToShow;
 	}
 
+	void LODModel::FixedLogic()
+	{
+		m_meshToShow = 0;
+		m_shownMeshCost = 0;
+		CalculateEachLODValue();
+	}
+
 	void LODModel::MainDraw()
 	{
 		auto camera = m_camera.lock();
@@ -79,18 +125,12 @@ namespace snes
 			return;
 		}
 
-		int lod = GetCurrentLOD();
-		if (lod == -1)
-		{
-			return;
-		}
-
-		m_materials[lod]->PrepareForRendering();
-		m_meshes[lod]->PrepareForRendering();
-		PrepareTransformUniforms(*camera, *m_materials[lod]);
+		m_materials[m_meshToShow]->PrepareForRendering();
+		m_meshes[m_meshToShow]->PrepareForRendering();
+		PrepareTransformUniforms(*camera, *m_materials[m_meshToShow]);
 
 		// Draw the mesh
-		glDrawArrays(GL_TRIANGLES, 0, m_meshes[lod]->GetVertexCount());
+		glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_meshToShow]->GetVertexCount());
 
 		// Unbind the VBO and VAO
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -126,4 +166,98 @@ namespace snes
 		}
 	}
 
+	int LODModel::CalculateEachLODValue()
+	{
+		float costCoefficient = 1;
+		float costCoefficient2 = 1;
+
+		float distanceToCamera = glm::length(m_transform.GetWorldPosition() - m_camera.lock()->GetTransform().GetWorldPosition());
+		float size = m_meshes[0]->GetSize(); // approximate number of pixels covered by object
+		size = GetScreenSizeOfMesh(0);
+
+		int bestIndex = 0;
+		float bestValue = 0;
+
+		for (int i = 0; i < m_meshes.size(); i++)
+		{
+			uint numFaces = m_meshes[i]->GetNumFaces();
+			uint numVertices = m_meshes[i]->GetVertexCount();
+
+			float cost = numFaces * costCoefficient + numVertices * costCoefficient2;
+
+			float baseError = 0.5f;
+			float accuracy = 1.0f - ((baseError / numFaces) * (baseError / numFaces)); //1 - (BaseError / number of faces)^2
+			float importance = 1.0f;
+			float focus = 1.0f; // Proportional to distance from object to screen center
+			float motion = 1.0f; // proportional to the ratio of the object's apparent speed to the size of an average polygon
+			
+			float benefit = size * accuracy * importance * focus * motion; // * hysteresis
+
+			float value = benefit / cost;
+
+			LODValue valueEntry = { this, i, cost, value };
+			m_lodValues.push_back(valueEntry);
+			// @TODO: Find the maximum "cost" for a frame, then select LODs for each model in descending order of value until the cost is completely claimed.
+			// Maybe calculate all the "value"s in MainLogic(), then do LOD selection once.
+		}
+		
+		return bestIndex;
+	}
+
+	float LODModel::GetScreenSizeOfMesh(int index)
+	{
+		//https://stackoverflow.com/questions/21648630/radius-of-projected-sphere-in-screen-space
+		float fovy = m_camera.lock()->GetVerticalFoV();
+
+		// Get the radius of the mesh's encapsulating sphere
+		glm::vec3 worldScale = m_transform.GetWorldScale();
+		float maxScale = std::max(std::max(worldScale.x, worldScale.y), worldScale.z);
+		float r = m_meshes[index]->GetSize() * maxScale / 2.0f;
+
+		// Get the distance between the camera and the mesh's origin
+		float d = glm::length(m_transform.GetWorldPosition() - m_camera.lock()->GetTransform().GetWorldPosition());
+		if (r > d)
+		{
+			// Camera is inside object's bounding sphere
+			// Display highest LOD
+			return -1.0f;
+		}
+
+		// Find the "projected radius" of the mesh in normalized screen space
+		float l = sqrtf(d*d - r*r);
+		float pr = (1 / tanf(fovy / 2) * (r / l));
+		return pr;
+	}
+
+	void LODModel::StartNewFrame()
+	{
+		m_lodValues.clear();
+		m_lodValues.reserve(m_instanceCount);
+		m_totalCost = 0;
+	}
+
+	void LODModel::SortAndSetLODValues()
+	{
+		float m_maxCost = 3000000;	// @TODO: Find a proper value for the max cost
+		
+		// Sort m_lodValues by value
+		Quicksort(m_lodValues, 0, m_lodValues.size() - 1);
+
+		int i = 0;
+		while (m_totalCost < m_maxCost && i < m_lodValues.size())
+		{
+			m_lodValues[i].model->SetCurrentLOD(m_lodValues[i]);
+			++i;
+		}
+	}
+
+	void LODModel::SetCurrentLOD(LODValue& lodValue)
+	{
+		m_totalCost -= m_shownMeshCost;
+
+		m_meshToShow = lodValue.meshIndex;
+		m_shownMeshCost = lodValue.cost;
+
+		m_totalCost += m_shownMeshCost;
+	}
 }

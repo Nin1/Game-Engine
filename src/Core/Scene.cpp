@@ -41,15 +41,15 @@ namespace snes
 		std::shared_ptr<UnlitTexturedMat> texturedMat = std::make_shared<UnlitTexturedMat>();
 		texturedMat->SetTexture("Models/Jiggy.bmp");
 
-		CreateJiggy(glm::vec3(15, 0, 0), camera.lock(), discoMat);
-		CreateJiggy(glm::vec3(-15, 0, 0), camera.lock(), discoMat);
+		CreateJiggy(glm::vec3(15, 0, 0), camera.lock(), texturedMat);
+		CreateJiggy(glm::vec3(-15, 0, 0), camera.lock(), texturedMat);
 		CreateJiggy(glm::vec3(0, 0, 15), camera.lock(), texturedMat);
 		CreateLink(glm::vec3(0, 0, -15), camera.lock());
 		CreateFloor(camera.lock());
 		// Create a ton of spheres
-		for (int i = -25; i < 25; i++)
+		for (int i = -20; i < 15; i++)
 		{
-			for (int j = -25; j < 25; j++)
+			for (int j = -20; j < 15; j++)
 			{
 				CreateSphere(glm::vec3(i*2, -5, j*2), camera.lock());
 			}
@@ -71,12 +71,17 @@ namespace snes
 
 	void Scene::FixedLogic()
 	{
+		LODModel::StartNewFrame();
+
 		m_root->FixedLogic();
+
+		LODModel::SortAndSetLODValues();
 		
 		// Generate list of all GameObjects
 		std::vector<std::weak_ptr<GameObject>> allObjects = m_root->GetAllChildren();
 
 		// Handle collision between all GameObjects once
+		/*
 		for (uint i = 0; i < allObjects.size(); i++)
 		{
 			auto currentObject = allObjects.at(i).lock();
@@ -97,14 +102,17 @@ namespace snes
 
 			rigidbody->UpdatePosition();
 		}
+		*/
 	}
 
 	void Scene::MainDraw()
 	{
 		m_deferredLightingMgr.PrepareNewFrame();
 
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		// Render all objects in geometry pass to deferred framebuffer
 		m_root->MainDraw();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		// Render deferred lighting
 		m_deferredLightingMgr.RenderLighting(m_camera->GetTransform(), m_pointLights);

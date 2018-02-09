@@ -30,6 +30,10 @@ namespace snes
 
 		const void PrepareForRendering() const;
 
+		int GetNumFaces() { return m_numFaces; }
+		/** @return the "diameter" of the sphere that would encapsulate the object*/
+		float GetSize() { return m_size; }
+
 	public:
 		/** Returns the mesh data from the mesh at the given path */
 		static std::shared_ptr<Mesh> GetMesh(const char* modelPath);
@@ -58,6 +62,9 @@ namespace snes
 		std::vector<glm::vec3> m_vertices;
 		std::vector<glm::vec2> m_texCoords;
 		std::vector<glm::vec3> m_normals;
+		uint m_numFaces;
+		/** Distance between the two furthest vertices */
+		float m_size;
 
 		GLuint m_vertexArrayID = -1;
 		GLuint m_vertexBufferID = -1;

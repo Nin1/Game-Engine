@@ -94,4 +94,9 @@ namespace snes
 		CalculateCurrentProjMatrix();
 		CalculateCurrentViewMatrix();
 	}
+
+	float Camera::GetVerticalFoV()
+	{
+		return (m_fieldOfView / 4) * 3; // 4:3
+	}
 }

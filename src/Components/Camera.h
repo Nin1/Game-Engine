@@ -20,6 +20,9 @@ namespace snes
 		/** @return the view matrix for this camera */
 		glm::mat4 GetViewMatrix() { return m_viewMatrix; }
 
+		float GetVerticalFoV();
+		float GetNearClipPlane() { return m_nearClipPlane; }
+
 	private:
 		/** @return the direction the camera is facing in euler angles */
 		glm::vec3 GetCameraDirection();
