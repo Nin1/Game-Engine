@@ -9,8 +9,9 @@ namespace snes
 {
 	void Rigidbody::FixedLogic()
 	{
-		m_velocity.y -= 9.81f * FrameTime::SECONDS_PER_FIXED_LOOP;
+		//m_velocity.y -= 9.81f * FrameTime::SECONDS_PER_FIXED_LOOP;
 		ApplyDrag();
+		UpdatePosition();
 	}
 
 	void Rigidbody::ApplyDrag()

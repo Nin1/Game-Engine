@@ -2,6 +2,7 @@
 #include "LODModel.h"
 #include "Camera.h"
 #include <Core\GameObject.h>
+#include <Core\Input.h>
 #include <GL/glew.h>
 #include <glm/gtx/euler_angles.hpp>
 #include <algorithm>
@@ -12,40 +13,10 @@ namespace snes
 	std::vector<LODValue> LODModel::m_lodValues;
 	uint LODModel::m_instanceCount = 0;
 	float LODModel::m_totalCost = 0;
-
-	/** Quicksort algorithm used to sort the LODValues by value */
-	int Partition(std::vector<LODValue>& v, int lowIndex, int highIndex)
-	{
-		LODValue& pivot = v[highIndex];
-		int i = lowIndex - 1;
-
-		for (int j = lowIndex; j <= highIndex - 1; j++)
-		{
-			if (v[j].value > pivot.value)
-			{
-				i++;
-				// Swap i and j
-				LODValue swap = v[i];
-				v[i] = v[j];
-				v[j] = swap;
-			}
-		}
-		++i;
-		LODValue swap = v[i];
-		v[i] = v[highIndex];
-		v[highIndex] = swap;
-		return i;
-	}
-	void Quicksort(std::vector<LODValue>& v, int lowIndex, int highIndex)
-	{
-		if (lowIndex < highIndex)
-		{
-			int partitionIndex = Partition(v, lowIndex, highIndex);
-			Quicksort(v, lowIndex, partitionIndex - 1);
-			Quicksort(v, partitionIndex + 1, highIndex);
-		}
-	}
-
+	float LODModel::m_maxCost = 5000000;
+	std::weak_ptr<GameObject> LODModel::m_referenceObj;
+	bool LODModel::m_useReferenceObj = false;
+	
 	void LODModel::Load(std::string modelName)
 	{
 		// Load the .lod file for this model
@@ -88,7 +59,7 @@ namespace snes
 			return;
 		}
 
-		m_instanceCount += m_meshes.size();
+		m_meshToShow = m_meshes.size() - 1;
 	}
 
 	int LODModel::GetCurrentLOD() const
@@ -99,7 +70,17 @@ namespace snes
 		}
 
 		// Use heuristics to determine the best mesh to show
-		float distanceToCamera = glm::length(m_transform.GetWorldPosition() - m_camera.lock()->GetTransform().GetWorldPosition());
+		glm::vec3 cameraPos;
+		if (m_useReferenceObj)
+		{
+			cameraPos = m_referenceObj.lock()->GetTransform().GetWorldPosition();
+		}
+		else
+		{
+			cameraPos = m_camera.lock()->GetTransform().GetWorldPosition();
+		}
+
+		float distanceToCamera = glm::length(m_transform.GetWorldPosition() - cameraPos);
 		float distancePerLOD = (m_distanceLow - m_distanceHigh) / m_meshes.size();
 
 		uint lodToShow = (uint)std::abs((distanceToCamera + m_distanceHigh) / distancePerLOD);
@@ -171,22 +152,20 @@ namespace snes
 		float costCoefficient = 1;
 		float costCoefficient2 = 1;
 
-		float distanceToCamera = glm::length(m_transform.GetWorldPosition() - m_camera.lock()->GetTransform().GetWorldPosition());
-		float size = m_meshes[0]->GetSize(); // approximate number of pixels covered by object
-		size = GetScreenSizeOfMesh(0);
+		float size = GetScreenSizeOfMesh(0);
 
 		int bestIndex = 0;
 		float bestValue = 0;
-
+		
 		for (int i = 0; i < m_meshes.size(); i++)
 		{
-			uint numFaces = m_meshes[i]->GetNumFaces();
+			uint numFaces = m_meshes[i]->GetNumFaces();	// @TODO: Calculate a proper cost heuristic
 			uint numVertices = m_meshes[i]->GetVertexCount();
 
 			float cost = numFaces * costCoefficient + numVertices * costCoefficient2;
 
 			float baseError = 0.5f;
-			float accuracy = 1.0f - ((baseError / numFaces) * (baseError / numFaces)); //1 - (BaseError / number of faces)^2
+			float accuracy = size / numFaces; //1.0f - ((baseError / numFaces) * (baseError / numFaces)); //1 - (BaseError / number of faces)^2
 			float importance = 1.0f;
 			float focus = 1.0f; // Proportional to distance from object to screen center
 			float motion = 1.0f; // proportional to the ratio of the object's apparent speed to the size of an average polygon
@@ -215,7 +194,18 @@ namespace snes
 		float r = m_meshes[index]->GetSize() * maxScale / 2.0f;
 
 		// Get the distance between the camera and the mesh's origin
-		float d = glm::length(m_transform.GetWorldPosition() - m_camera.lock()->GetTransform().GetWorldPosition());
+		/** Find distance from camera or distance from reference object? */
+		glm::vec3 cameraPos;
+		if (m_useReferenceObj)
+		{
+			cameraPos = m_referenceObj.lock()->GetTransform().GetWorldPosition();
+		}
+		else
+		{
+			cameraPos = m_camera.lock()->GetTransform().GetWorldPosition();
+		}
+
+		float d = glm::length(m_transform.GetWorldPosition() - cameraPos);
 		if (r > d)
 		{
 			// Camera is inside object's bounding sphere
@@ -232,16 +222,30 @@ namespace snes
 	void LODModel::StartNewFrame()
 	{
 		m_lodValues.clear();
-		m_lodValues.reserve(m_instanceCount);
+		m_lodValues.reserve(m_instanceCount * 3);
 		m_totalCost = 0;
 	}
 
 	void LODModel::SortAndSetLODValues()
 	{
-		float m_maxCost = 3000000;	// @TODO: Find a proper value for the max cost
+		if (Input::GetKeyDown('-'))
+		{
+			m_maxCost -= 100000;
+		}
+		if (Input::GetKeyDown('='))
+		{
+			m_maxCost += 100000;
+		}
+		if (Input::GetKeyDown('o'))
+		{
+			m_useReferenceObj = !m_useReferenceObj;
+		}
 		
 		// Sort m_lodValues by value
-		Quicksort(m_lodValues, 0, m_lodValues.size() - 1);
+		std::sort(m_lodValues.begin(), m_lodValues.end(), [](const LODValue& a, const LODValue& b)
+		{
+			return a.value > b.value;
+		});
 
 		int i = 0;
 		while (m_totalCost < m_maxCost && i < m_lodValues.size())

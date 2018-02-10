@@ -21,7 +21,7 @@ uniform PointLight pointLights[MAX_POINT_LIGHTS];
 
 uniform vec3 viewPos;
 
-const float AMBIENT = 0.1;
+const float AMBIENT = 0.5;
 
 void main()
 {

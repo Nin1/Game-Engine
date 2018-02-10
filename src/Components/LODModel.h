@@ -19,14 +19,15 @@ namespace snes
 	class LODModel : public Component
 	{
 	public:
-		LODModel(GameObject& gameObject) : Component(gameObject) {};
-		~LODModel() { m_instanceCount -= m_meshes.size(); };
+		LODModel(GameObject& gameObject) : Component(gameObject) { m_instanceCount++; };
+		~LODModel() { m_instanceCount--; };
 
 		/** Load meshes of all LODs starting with "meshName0.obj" */
 		void Load(std::string modelName);
 
 		/** Sets the camera from which to render the mesh */
 		void SetCamera(std::weak_ptr<Camera> camera) { m_camera = camera; }
+		void SetReferenceObject(std::weak_ptr<GameObject> object) { m_referenceObj = object; }
 
 		void FixedLogic() override;
 		void MainDraw() override;
@@ -47,6 +48,8 @@ namespace snes
 		static uint m_instanceCount;
 		/** The total cost of all selected meshes so far */
 		static float m_totalCost;
+		/** The maximum total cost allowed */
+		static float m_maxCost;
 
 	private:
 		/** Calculate the model/view/proj matrices and apply them to the material */
@@ -58,6 +61,8 @@ namespace snes
 
 		/** The camera to render the mesh from */
 		std::weak_ptr<Camera> m_camera;
+		static std::weak_ptr<GameObject> m_referenceObj;
+		static bool m_useReferenceObj;
 
 		/** List of meshes
 		  * Lower indexes represent higher-detailed meshes

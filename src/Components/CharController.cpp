@@ -22,8 +22,8 @@ namespace snes
 		auto rb = m_gameObject.GetComponent<Rigidbody>();
 		if (rb)
 		{
-			rb->SetDrag(glm::vec3(200.0f, 0.0f, 200.0f));
-			rb->SetMaxLateralSpeed(1.0f);
+			rb->SetDrag(glm::vec3(80.0f, 0.0f, 80.0f));
+			rb->SetMaxLateralSpeed(4.0f);
 		}
 	}
 
@@ -40,19 +40,19 @@ namespace snes
 		{
 			if (Input::GetKeyHeld('w'))
 			{
-				rb->AddVelocity(glm::vec3(0, 0, -100.0f) * FrameTime::GetLastFrameDuration());
+				rb->AddVelocity(glm::vec3(0, 0, -200.0f) * FrameTime::GetLastFrameDuration());
 			}
 			if (Input::GetKeyHeld('s'))
 			{
-				rb->AddVelocity(glm::vec3(0, 0, 100.0f) * FrameTime::GetLastFrameDuration());
+				rb->AddVelocity(glm::vec3(0, 0, 200.0f) * FrameTime::GetLastFrameDuration());
 			}
 			if (Input::GetKeyHeld('d'))
 			{
-				rb->AddVelocity(glm::vec3(100.0f, 0, 0) * FrameTime::GetLastFrameDuration());
+				rb->AddVelocity(glm::vec3(200.0f, 0, 0) * FrameTime::GetLastFrameDuration());
 			}
 			if (Input::GetKeyHeld('a'))
 			{
-				rb->AddVelocity(glm::vec3(-100.0f, 0, 0) * FrameTime::GetLastFrameDuration());
+				rb->AddVelocity(glm::vec3(-200.0f, 0, 0) * FrameTime::GetLastFrameDuration());
 			}
 			if (Input::GetKeyDown(' '))
 			{
