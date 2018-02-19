@@ -52,6 +52,13 @@ namespace snes
 		return true;
 	}
 
+	bool ShaderProgram::SetGlUniformBool(const char* name, bool value)
+	{
+		GLuint position = FindUniformPositionFromName(name);
+		glUniform1i(position, value);
+		return true;
+	}
+
 	GLuint ShaderProgram::FindUniformPositionFromName(const char* name)
 	{
 		// If it's part of an array, find it manually
@@ -87,6 +94,8 @@ namespace snes
 			return "src/rendering/shaders/LitColour";
 		case LIT_TEXTURED:
 			return "src/rendering/shaders/LitTextured";
+		case BILLBOARD:
+			return "src/rendering/shaders/Billboard";
 		case DEFERRED_MODEL:
 			return "src/rendering/shaders/DeferredModel";
 		case DEFERRED_LIGHTING_PASS:

@@ -39,6 +39,7 @@
     <ClInclude Include="src\Core\Screen.h" />
     <ClInclude Include="src\Rendering\DeferredLightingManager.h" />
     <ClInclude Include="src\Rendering\Material.h" />
+    <ClInclude Include="src\Rendering\Materials\BillboardMat.h" />
     <ClInclude Include="src\Rendering\Materials\DiscoMat.h" />
     <ClInclude Include="src\Rendering\Materials\LitColourMat.h" />
     <ClInclude Include="src\Rendering\Materials\LitTexturedMat.h" />
@@ -70,6 +71,7 @@
     <ClCompile Include="src\Core\Screen.cpp" />
     <ClCompile Include="src\Rendering\DeferredLightingManager.cpp" />
     <ClCompile Include="src\Rendering\Material.cpp" />
+    <ClCompile Include="src\Rendering\Materials\BillboardMat.cpp" />
     <ClCompile Include="src\Rendering\Materials\DiscoMat.cpp" />
     <ClCompile Include="src\Rendering\Materials\LitColourMat.cpp" />
     <ClCompile Include="src\Rendering\Materials\LitTexturedMat.cpp" />

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Scene.h"
+#include "Input.h"
 #include <Components\AABBCollider.h>
 #include <Components\Camera.h>
 #include <Components\CharController.h>
@@ -47,24 +48,24 @@ namespace snes
 		auto lodReferenceObj = CreateLink(glm::vec3(0, 0, -15), camera.lock());
 		CreateFloor(camera.lock());
 		// Create a ton of spheres
-		for (int i = -40; i < 40; i++)
+		for (int i = -35; i < 35; i++)
 		{
-			for (int j = -20; j < 20; j++)
+			for (int j = -15; j < 15; j++)
 			{
 				CreateSphere(glm::vec3(i*2, -5, j*2), camera.lock(), lodReferenceObj);
 			}
 		}
 		// Create a bunch of pretty lights on the floor
-		CreatePointLight(*m_root, glm::vec3(10, -8, 0), glm::vec3(1, 0, 1));
-		CreatePointLight(*m_root, glm::vec3(-10, -8, 0), glm::vec3(1, 1, 0));
-		CreatePointLight(*m_root, glm::vec3(0, -8, 10), glm::vec3(0, 1, 1));
-		CreatePointLight(*m_root, glm::vec3(0, -8, -10), glm::vec3(1, 0, 0));
-		CreatePointLight(*m_root, glm::vec3(-10, -8, 10), glm::vec3(0, 1, 0));
-		CreatePointLight(*m_root, glm::vec3(10, -8, 10), glm::vec3(0, 0, 1));
-		CreatePointLight(*m_root, glm::vec3(10, -8, -10), glm::vec3(1, 1, 1));
-		CreatePointLight(*m_root, glm::vec3(-10, -8, -10), glm::vec3(1, 1, 1));
+/*		CreatePointLight(*m_root, glm::vec3(10, 0, 0), glm::vec3(1, 0, 1));
+		CreatePointLight(*m_root, glm::vec3(-10, 0, 0), glm::vec3(1, 1, 0));
+		CreatePointLight(*m_root, glm::vec3(0, 0, 10), glm::vec3(0, 1, 1));
+		CreatePointLight(*m_root, glm::vec3(0, 0, -10), glm::vec3(1, 0, 0));
+		CreatePointLight(*m_root, glm::vec3(-10, 0, 10), glm::vec3(0, 1, 0));
+		CreatePointLight(*m_root, glm::vec3(10, 0, 10), glm::vec3(0, 0, 1));
+		CreatePointLight(*m_root, glm::vec3(10, 0, -10), glm::vec3(1, 1, 1));
+		CreatePointLight(*m_root, glm::vec3(-10, 0, -10), glm::vec3(1, 1, 1));*/
 		// Create a big light in the center of the scene
-		GameObject& bigLight = CreatePointLight(*m_root, glm::vec3(0, -8, 0), glm::vec3(1, 1, 1));
+		GameObject& bigLight = CreatePointLight(*m_root, glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
 		bigLight.GetComponent<PointLight>()->SetLinearAttenuation(0.001f);
 		bigLight.GetComponent<PointLight>()->SetQuadraticAttenuation(0.002f);
 	}
@@ -109,7 +110,10 @@ namespace snes
 	{
 		m_deferredLightingMgr.PrepareNewFrame();
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		if (Input::GetKeyHeld('f'))
+		{
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		}
 		// Render all objects in geometry pass to deferred framebuffer
 		m_root->MainDraw();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

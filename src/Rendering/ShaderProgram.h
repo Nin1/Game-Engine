@@ -12,6 +12,7 @@ namespace snes
 		LIT_COLOUR,
 		UNLIT_TEXTURED,
 		LIT_TEXTURED,
+		BILLBOARD,
 		DEFERRED_MODEL,
 		DEFERRED_LIGHTING_PASS
 	};
@@ -40,6 +41,7 @@ namespace snes
 		bool SetGlUniformFloat(const char* name, float value);
 		bool SetGlUniformInt(const char* name, int value);
 		bool SetGlUniformSampler2D(const char* name, GLuint value);
+		bool SetGlUniformBool(const char* name, bool value);
 
 		GLuint GetProgramID() { return m_programID; }
 		void Load(ShaderName shaderName) { m_programID = LoadShaders(shaderName); }

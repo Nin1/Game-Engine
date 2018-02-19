@@ -7,7 +7,7 @@ namespace snes
 {
 	float FrameTime::m_deltaTime = 0.0f;
 	uint FrameTime::m_maxFPS = 60;
-	bool FrameTime::m_limitFPS = false;
+	bool FrameTime::m_limitFPS = true;
 
 	FrameTime::FrameTime()
 	{

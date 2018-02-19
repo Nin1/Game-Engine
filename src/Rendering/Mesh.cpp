@@ -46,6 +46,8 @@ namespace snes
 		std::vector<glm::vec3> tempVerts;
 		std::vector<glm::vec2> tempUVs;
 		std::vector<glm::vec3> tempNormals;
+		std::vector<glm::vec3> tempTangents;
+		std::vector<glm::vec3> tempBitangents;
 		std::vector<uint> vertIndices, uvIndices, normalIndices;
 		std::string line;
 		uint faceAttributeCount = 0;

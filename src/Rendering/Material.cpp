@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Material.h"
+#include "Materials/BillboardMat.h"
 #include "Materials/DiscoMat.h"
 #include "Materials/LitColourMat.h"
 #include "Materials/LitTexturedMat.h"
@@ -72,6 +73,10 @@ namespace snes
 		{
 			material = std::make_shared<DiscoMat>(params);
 		}
+		else if (line == "BILLBOARD")
+		{
+			material = std::make_shared<BillboardMat>(params);
+		}
 		else
 		{
 			material = std::make_shared<SolidColourMat>();
@@ -115,6 +120,10 @@ namespace snes
 		{
 			m_shader->SetGlUniformSampler2D(uniform.first.c_str(), uniform.second);
 		}
+		for (const auto& uniform : m_bools)
+		{
+			m_shader->SetGlUniformBool(uniform.first.c_str(), uniform.second);
+		}
 	}
 
 	void Material::ApplyTransformUniforms(glm::mat4& model, glm::mat4& view, glm::mat4& proj)
@@ -147,5 +156,10 @@ namespace snes
 	void Material::SetUniformSampler2D(const char* name, GLuint value)
 	{
 		m_sampler2Ds[name] = value;
+	}
+
+	void Material::SetUniformBool(const char* name, bool value)
+	{
+		m_bools[name] = value;
 	}
 }

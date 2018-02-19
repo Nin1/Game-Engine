@@ -4,6 +4,8 @@
 
 namespace snes
 {
+	class Transform;
+
 	// Derive from this to make your material
 	class Material
 	{
@@ -12,6 +14,7 @@ namespace snes
 
 		/** Called before rendering, set uniforms in here */
 		virtual void PrepareForRendering();
+		virtual void PrepareForRendering(Transform& transform) { this->PrepareForRendering(); }
 
 		/** Set the model, view, and projection uniforms (these must be present in every material shader) */
 		void ApplyTransformUniforms(glm::mat4& model, glm::mat4& view, glm::mat4& proj);
@@ -28,6 +31,7 @@ namespace snes
 		void SetUniformVec3(const char* name, glm::vec3 value);
 		void SetUniformFloat(const char* name, float value);
 		void SetUniformSampler2D(const char* name, GLuint value);
+		void SetUniformBool(const char* name, bool value);
 
 	protected:
 		/** Cache of all loaded shaders */
@@ -43,6 +47,7 @@ namespace snes
 		std::map<std::string, glm::mat4> m_mat4s;
 		std::map<std::string, float> m_floats;
 		std::map<std::string, GLuint> m_sampler2Ds;
+		std::map<std::string, bool> m_bools;
 
 		static ShaderName m_currentShader;
 	};

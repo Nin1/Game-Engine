@@ -126,6 +126,9 @@
     <ClInclude Include="src\Rendering\Materials\LitTexturedMat.h">
       <Filter>Header Files\Rendering\Materials</Filter>
     </ClInclude>
+    <ClInclude Include="src\Rendering\Materials\BillboardMat.h">
+      <Filter>Header Files\Rendering\Materials</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
@@ -213,6 +216,9 @@
       <Filter>Source Files\Rendering\Materials</Filter>
     </ClCompile>
     <ClCompile Include="src\Rendering\Materials\LitTexturedMat.cpp">
+      <Filter>Source Files\Rendering\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Materials\BillboardMat.cpp">
       <Filter>Source Files\Rendering\Materials</Filter>
     </ClCompile>
   </ItemGroup>

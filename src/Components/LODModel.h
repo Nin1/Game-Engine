@@ -42,6 +42,7 @@ namespace snes
 		static void SortAndSetLODValues();
 
 	private:
+		const static GLubyte STIPPLE_PATTERN[128];
 		/** List of the value (benefit/cost) for every LOD of every mesh in the scene */
 		static std::vector<LODValue> m_lodValues;
 		/** A count of how many meshes exist total across all LODModels */
