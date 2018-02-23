@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "LODModel.h"
 #include "Camera.h"
+#include <Core\FrameTime.h>
 #include <Core\GameObject.h>
 #include <Core\Input.h>
 #include <GL/glew.h>
@@ -10,40 +11,14 @@
 
 namespace snes
 {
-	const GLubyte LODModel::STIPPLE_PATTERN[128] = {
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA,
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA,
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA,
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA,
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA,
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA,
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA,
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA,
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA,
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA,
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA,
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA,
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA,
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA,
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA,
-		0x55, 0x55, 0x55, 0x55,
-		0xAA, 0xAA, 0xAA, 0xAA
+	const float LODModel::STIPPLE_PATTERN[16] = {
+		1.0f/17.0f,  9.0f/17.0f,  3.0f/17.0f,  11.0f/17.0f,
+		13.0f/17.0f, 5.0f/17.0f,  15.0f/17.0f, 7.0f/17.0f,
+		4.0f/17.0f,  12.0f/17.0f, 2.0f/17.0f,  10.0f/17.0f,
+		16.0f/17.0f, 8.0f/17.0f,  14.0f/17.0f, 6.0f/17.0f
 	};
+	const float LODModel::TRANSITION_DURATION_S = 1.0f;
+
 	std::vector<LODValue> LODModel::m_lodValues;
 	uint LODModel::m_instanceCount = 0;
 	float LODModel::m_totalCost = 0;
@@ -93,7 +68,7 @@ namespace snes
 			return;
 		}
 
-		m_meshToShow = m_meshes.size() - 1;
+		m_currentMesh = m_meshes.size() - 1;
 	}
 
 	int LODModel::GetCurrentLOD() const
@@ -127,9 +102,18 @@ namespace snes
 
 	void LODModel::FixedLogic()
 	{
-		m_meshToShow = 0;
+		m_currentMesh = 0;
 		m_shownMeshCost = 0;
 		CalculateEachLODValue();
+	}
+
+	void LODModel::MainLogic()
+	{
+		// Update LOD transition
+		if (m_transitionRemainingS > 0.0f)
+		{
+			m_transitionRemainingS -= FrameTime::GetLastFrameDuration();
+		}
 	}
 
 	void LODModel::MainDraw()
@@ -140,15 +124,21 @@ namespace snes
 			return;
 		}
 
-		m_materials[m_meshToShow]->PrepareForRendering(m_transform);
-		m_meshes[m_meshToShow]->PrepareForRendering();
-		PrepareTransformUniforms(*camera, *m_materials[m_meshToShow]);
+		if (m_currentMesh != m_lastRenderedMesh && m_transitionRemainingS <= 0.0f)
+		{
+			// The displayed mesh has changed - begin a transition
+			m_transitioningFromMesh = m_lastRenderedMesh;	// Set the last mesh as one to fade out
+			m_lastRenderedMesh = m_currentMesh;
+			m_transitionRemainingS = TRANSITION_DURATION_S;
+		}
 
-		//glEnable(GL_POLYGON_STIPPLE);
-		glPolygonStipple(STIPPLE_PATTERN);
+		DrawCurrentMesh(*camera);
 
-		// Draw the mesh
-		glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_meshToShow]->GetVertexCount());
+		if (m_transitionRemainingS > 0.0f)
+		{
+			// Draw previously selected mesh if transitioning
+			DrawLastMesh(*camera);
+		}
 
 		glDisable(GL_POLYGON_STIPPLE);
 
@@ -157,6 +147,75 @@ namespace snes
 		glBindVertexArray(0);
 	}
 
+	void LODModel::DrawCurrentMesh(Camera& camera)
+	{
+		m_materials[m_lastRenderedMesh]->PrepareForRendering(m_transform);
+		m_meshes[m_lastRenderedMesh]->PrepareForRendering();
+		PrepareTransformUniforms(camera, *m_materials[m_lastRenderedMesh]);
+
+		if (m_transitionRemainingS > 0.0f)
+		{
+			glEnable(GL_POLYGON_STIPPLE);
+			float opacity = 1.0f - (m_transitionRemainingS / TRANSITION_DURATION_S);
+			GenerateStipplePattern(opacity, m_stipplePattern);
+			glPolygonStipple(m_stipplePattern);
+		}
+
+		// Draw the mesh
+		glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_lastRenderedMesh]->GetVertexCount());
+	}
+
+	void LODModel::DrawLastMesh(Camera& camera)
+	{
+		m_materials[m_transitioningFromMesh]->PrepareForRendering(m_transform);
+		m_meshes[m_transitioningFromMesh]->PrepareForRendering();
+		PrepareTransformUniforms(camera, *m_materials[m_transitioningFromMesh]);
+
+		if (m_transitionRemainingS > 0.0f)
+		{
+			glEnable(GL_POLYGON_STIPPLE);
+			float opacity = m_transitionRemainingS / TRANSITION_DURATION_S;
+			// Render last mesh with an inverted stipple pattern so that it can fade out while the other mesh fades in, while keeping the object as a whole opaque
+			InvertStipplePattern(m_stipplePattern);
+			glPolygonStipple(m_stipplePattern);
+		}
+
+		// Draw the mesh
+		glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_transitioningFromMesh]->GetVertexCount());
+	}
+
+	void LODModel::GenerateStipplePattern(float opacity, GLubyte patternOut[128])
+	{
+		// Generate a 32x32 stipple pattern from the 4x4 ordered dithering pattern and opacity
+		for (int l = 0; l < 8; l++)
+		{
+			for (int k = 0; k < 4; k++)
+			{
+				for (int i = 0; i < 4; i++)
+				{
+					GLubyte eightBits = 0;
+					for (int j = 0; j < 4; j++)
+					{
+						if (opacity > STIPPLE_PATTERN[(4 * k) + j])
+						{
+							eightBits = eightBits | (1 << j);
+							eightBits = eightBits | (1 << (j + 4));
+						}
+					}
+					patternOut[(16 * l) + (4 * k) + i] = eightBits;
+				}
+			}
+		}
+	}
+
+	void LODModel::InvertStipplePattern(GLubyte patternOut[128])
+	{
+		// Invert the bits of the stipple pattern
+		for (int i = 0; i < 128; i++)
+		{
+			patternOut[i] = patternOut[i] ^ 255;
+		}
+	}
 
 	void LODModel::PrepareTransformUniforms(Camera& camera, Material& mat)
 	{
@@ -298,9 +357,10 @@ namespace snes
 	{
 		m_totalCost -= m_shownMeshCost;
 
-		m_meshToShow = lodValue.meshIndex;
+		m_currentMesh = lodValue.meshIndex;
 		m_shownMeshCost = lodValue.cost;
 
 		m_totalCost += m_shownMeshCost;
+		
 	}
 }

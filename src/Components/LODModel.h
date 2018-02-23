@@ -30,6 +30,7 @@ namespace snes
 		void SetReferenceObject(std::weak_ptr<GameObject> object) { m_referenceObj = object; }
 
 		void FixedLogic() override;
+		void MainLogic() override;
 		void MainDraw() override;
 
 		/** Return the index of the best LOD to show */
@@ -42,7 +43,9 @@ namespace snes
 		static void SortAndSetLODValues();
 
 	private:
-		const static GLubyte STIPPLE_PATTERN[128];
+		const static float STIPPLE_PATTERN[16];
+		/** The transition duration in seconds */
+		const static float TRANSITION_DURATION_S;
 		/** List of the value (benefit/cost) for every LOD of every mesh in the scene */
 		static std::vector<LODValue> m_lodValues;
 		/** A count of how many meshes exist total across all LODModels */
@@ -53,6 +56,12 @@ namespace snes
 		static float m_maxCost;
 
 	private:
+		void DrawCurrentMesh(Camera& camera);
+		/** Draw the last mesh with a stipple effect fading out */
+		void DrawLastMesh(Camera& camera);
+		/** Generate a stipple pattern between 0 (invisible) and 1 (visible) */
+		void GenerateStipplePattern(float opacity, GLubyte patternOut[128]);
+		void InvertStipplePattern(GLubyte patternOut[128]);
 		/** Calculate the model/view/proj matrices and apply them to the material */
 		void PrepareTransformUniforms(Camera& camera, Material& mat);
 		/** Cost/Benefit method for finding the best LOD to show */
@@ -77,8 +86,21 @@ namespace snes
 		float m_distanceHigh = 10;
 
 		/** The index of the mesh selected to show */
-		uint m_meshToShow = 0;
+		uint m_currentMesh = 0;
+		/** The index of the last mesh selected to show */
+		uint m_lastMesh = 0;
+
+		/** The index of the last mesh actually rendered */
+		uint m_lastRenderedMesh = 0;
+		/** The index of the mesh being transitioned from */
+		uint m_transitioningFromMesh = 0;
+
+		GLubyte m_stipplePattern[128] = { 0 };
+
+		/** The time remaining until the transition from one LOD to another is finished (in seconds) */
+		float m_transitionRemainingS = 0.0f;
 		/** The cost of the currently selected mesh */
 		uint m_shownMeshCost = 0;
+		uint m_lastMeshCost = 0;
 	};
 }
