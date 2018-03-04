@@ -17,7 +17,7 @@ namespace snes
 		4.0f/17.0f,  12.0f/17.0f, 2.0f/17.0f,  10.0f/17.0f,
 		16.0f/17.0f, 8.0f/17.0f,  14.0f/17.0f, 6.0f/17.0f
 	};
-	const float LODModel::TRANSITION_DURATION_S = 1.0f;
+	const float LODModel::TRANSITION_DURATION_S = 0.5f;
 
 	std::vector<LODValue> LODModel::m_lodValues;
 	uint LODModel::m_instanceCount = 0;
@@ -162,7 +162,14 @@ namespace snes
 		}
 
 		// Draw the mesh
-		glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_lastRenderedMesh]->GetVertexCount());
+		if (m_materials[m_lastRenderedMesh]->GetUsePatches())
+		{
+			glDrawArrays(GL_PATCHES, 0, m_meshes[m_lastRenderedMesh]->GetVertexCount());
+		}
+		else
+		{
+			glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_lastRenderedMesh]->GetVertexCount());
+		}
 	}
 
 	void LODModel::DrawLastMesh(Camera& camera)
@@ -181,7 +188,14 @@ namespace snes
 		}
 
 		// Draw the mesh
-		glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_transitioningFromMesh]->GetVertexCount());
+		if (m_materials[m_transitioningFromMesh]->GetUsePatches())
+		{
+			glDrawElements(GL_PATCHES, m_meshes[m_transitioningFromMesh]->GetNumFaces(), GL_UNSIGNED_INT, 0);
+		}
+		else
+		{
+			glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_transitioningFromMesh]->GetVertexCount());
+		}
 	}
 
 	void LODModel::GenerateStipplePattern(float opacity, GLubyte patternOut[128])

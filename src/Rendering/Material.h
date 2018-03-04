@@ -19,6 +19,8 @@ namespace snes
 		/** Set the model, view, and projection uniforms (these must be present in every material shader) */
 		void ApplyTransformUniforms(glm::mat4& model, glm::mat4& view, glm::mat4& proj);
 
+		bool GetUsePatches() { return m_usePatches; }
+
 	public:
 		static std::shared_ptr<Material> CreateMaterial(const char* matPath);
 
@@ -32,6 +34,8 @@ namespace snes
 		void SetUniformFloat(const char* name, float value);
 		void SetUniformSampler2D(const char* name, GLuint value);
 		void SetUniformBool(const char* name, bool value);
+
+		bool m_usePatches = false;
 
 	protected:
 		/** Cache of all loaded shaders */

@@ -129,6 +129,9 @@
     <ClInclude Include="src\Rendering\Materials\BillboardMat.h">
       <Filter>Header Files\Rendering\Materials</Filter>
     </ClInclude>
+    <ClInclude Include="src\Rendering\Materials\TessellatedMat.h">
+      <Filter>Header Files\Rendering\Materials</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
@@ -219,6 +222,9 @@
       <Filter>Source Files\Rendering\Materials</Filter>
     </ClCompile>
     <ClCompile Include="src\Rendering\Materials\BillboardMat.cpp">
+      <Filter>Source Files\Rendering\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Materials\TessellatedMat.cpp">
       <Filter>Source Files\Rendering\Materials</Filter>
     </ClCompile>
   </ItemGroup>

@@ -52,18 +52,18 @@ namespace snes
 		{
 			for (int j = -15; j < 15; j++)
 			{
-				CreateSphere(glm::vec3(i*2, -5, j*2), camera.lock(), lodReferenceObj);
+				//CreateSphere(glm::vec3(i*2, -5, j*2), camera.lock(), lodReferenceObj);
 			}
 		}
 		// Create a bunch of pretty lights on the floor
-/*		CreatePointLight(*m_root, glm::vec3(10, 0, 0), glm::vec3(1, 0, 1));
+		CreatePointLight(*m_root, glm::vec3(10, 0, 0), glm::vec3(1, 0, 1));
 		CreatePointLight(*m_root, glm::vec3(-10, 0, 0), glm::vec3(1, 1, 0));
 		CreatePointLight(*m_root, glm::vec3(0, 0, 10), glm::vec3(0, 1, 1));
 		CreatePointLight(*m_root, glm::vec3(0, 0, -10), glm::vec3(1, 0, 0));
 		CreatePointLight(*m_root, glm::vec3(-10, 0, 10), glm::vec3(0, 1, 0));
 		CreatePointLight(*m_root, glm::vec3(10, 0, 10), glm::vec3(0, 0, 1));
 		CreatePointLight(*m_root, glm::vec3(10, 0, -10), glm::vec3(1, 1, 1));
-		CreatePointLight(*m_root, glm::vec3(-10, 0, -10), glm::vec3(1, 1, 1));*/
+		CreatePointLight(*m_root, glm::vec3(-10, 0, -10), glm::vec3(1, 1, 1));
 		// Create a big light in the center of the scene
 		GameObject& bigLight = CreatePointLight(*m_root, glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
 		bigLight.GetComponent<PointLight>()->SetLinearAttenuation(0.001f);
@@ -213,13 +213,9 @@ namespace snes
 		floor->GetTransform().SetLocalPosition(glm::vec3(-100, -10.0f, -100));
 		floor->GetTransform().SetLocalScale(glm::vec3(100.0f, 0.5f, 100.0f));
 
-		auto meshRenderer = floor->AddComponent<MeshRenderer>().lock();
-		meshRenderer->SetMesh("Models/cube.obj");
-		meshRenderer->SetCamera(camera);
-
-		std::shared_ptr<LitTexturedMat> floorMat = std::make_shared<LitTexturedMat>();
-		floorMat->SetTexture("Models/cube.bmp");
-		meshRenderer->SetMaterial(floorMat);
+		auto& lodModel = floor->AddComponent<LODModel>().lock();
+		lodModel->SetCamera(camera);
+		lodModel->Load("Models/floor");
 
 		auto rb = floor->AddComponent<Rigidbody>().lock();
 		rb->LockPosition();

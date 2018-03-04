@@ -44,6 +44,7 @@
     <ClInclude Include="src\Rendering\Materials\LitColourMat.h" />
     <ClInclude Include="src\Rendering\Materials\LitTexturedMat.h" />
     <ClInclude Include="src\Rendering\Materials\SolidColourMat.h" />
+    <ClInclude Include="src\Rendering\Materials\TessellatedMat.h" />
     <ClInclude Include="src\Rendering\Materials\UnlitTexturedMat.h" />
     <ClInclude Include="src\Rendering\Mesh.h" />
     <ClInclude Include="src\Rendering\ShaderProgram.h" />
@@ -76,6 +77,7 @@
     <ClCompile Include="src\Rendering\Materials\LitColourMat.cpp" />
     <ClCompile Include="src\Rendering\Materials\LitTexturedMat.cpp" />
     <ClCompile Include="src\Rendering\Materials\SolidColourMat.cpp" />
+    <ClCompile Include="src\Rendering\Materials\TessellatedMat.cpp" />
     <ClCompile Include="src\Rendering\Materials\UnlitTexturedMat.cpp" />
     <ClCompile Include="src\Rendering\Mesh.cpp" />
     <ClCompile Include="src\Rendering\ShaderProgram.cpp" />

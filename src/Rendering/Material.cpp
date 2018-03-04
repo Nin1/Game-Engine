@@ -5,6 +5,7 @@
 #include "Materials/LitColourMat.h"
 #include "Materials/LitTexturedMat.h"
 #include "Materials/SolidColourMat.h"
+#include "Materials/TessellatedMat.h"
 #include "Materials/UnlitTexturedMat.h"
 #include <fstream>
 
@@ -76,6 +77,10 @@ namespace snes
 		else if (line == "BILLBOARD")
 		{
 			material = std::make_shared<BillboardMat>(params);
+		}
+		else if (line == "TESSELLATED_TEXTURED")
+		{
+			material = std::make_shared<TessellatedMat>(params);
 		}
 		else
 		{

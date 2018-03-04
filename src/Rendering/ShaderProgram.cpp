@@ -96,6 +96,8 @@ namespace snes
 			return "src/rendering/shaders/LitTextured";
 		case BILLBOARD:
 			return "src/rendering/shaders/Billboard";
+		case TESSELLATED_TEXTURED:
+			return "src/rendering/shaders/TessellatedTextured";
 		case DEFERRED_MODEL:
 			return "src/rendering/shaders/DeferredModel";
 		case DEFERRED_LIGHTING_PASS:
@@ -114,26 +116,66 @@ namespace snes
 		// Create the shaders
 		GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 		GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+		GLuint tessControlShaderID = glCreateShader(GL_TESS_CONTROL_SHADER);
+		GLuint tessEvaluationShaderID = glCreateShader(GL_TESS_EVALUATION_SHADER);
+		GLuint geometryShaderID = glCreateShader(GL_GEOMETRY_SHADER);
+		bool hasTessControl = false;
+		bool hasTessEval = false;
+		bool hasGeometry = false;
 
-		// Try to load the vertex shader
+		// Try to load the vertex shader (Needed)
 		std::string vertexShaderSource = LoadShaderFromFile((filePath + ".vs").c_str());
 		if (CompileShader(vertexShaderID, vertexShaderSource) == GL_FALSE)
 		{
 			return 0;
 		}
 
-		// Try to load the fragment shader
+		// Try to load the fragment shader (Needed)
 		std::string fragShaderSource = LoadShaderFromFile((filePath + ".fs").c_str());
 		if (CompileShader(fragmentShaderID, fragShaderSource) == GL_FALSE)
 		{
 			return 0;
 		}
 
+		// Try to load the tessellation control shader (optional)
+		std::string tessControlShaderSource = LoadShaderFromFile((filePath + ".tcs").c_str());
+		if (tessControlShaderSource.length() > 0)
+		{
+			hasTessControl = (CompileShader(tessControlShaderID, tessControlShaderSource) != GL_FALSE);
+		}
+
+		// Try to load the tessellation evaluation shader (optional)
+		std::string tessEvalShaderSource = LoadShaderFromFile((filePath + ".tes").c_str());
+		if (tessEvalShaderSource.length() > 0)
+		{
+			hasTessEval = (CompileShader(tessEvaluationShaderID, tessEvalShaderSource) != GL_FALSE);
+		}
+
+		// Try to load the geometry shader (optional)
+		std::string geometryShaderSource = LoadShaderFromFile((filePath + ".gs").c_str());
+		if (geometryShaderSource.length() > 0)
+		{
+			//hasGeometry = (CompileShader(geometryShaderID, geometryShaderSource) != GL_FALSE);
+		}
+
+
 		// Link the program
 		printf("Linking program\n");
 		m_programID = glCreateProgram();
 		glAttachShader(m_programID, vertexShaderID);
 		glAttachShader(m_programID, fragmentShaderID);
+		if (hasTessControl)
+		{
+			glAttachShader(m_programID, tessControlShaderID);
+		}
+		if (hasTessEval)
+		{
+			glAttachShader(m_programID, tessEvaluationShaderID);
+		}
+		if (hasGeometry)
+		{
+			glAttachShader(m_programID, geometryShaderID);
+		}
 		glLinkProgram(m_programID);
 
 		GLint result = GL_FALSE;
@@ -151,9 +193,33 @@ namespace snes
 
 		glDetachShader(m_programID, vertexShaderID);
 		glDetachShader(m_programID, fragmentShaderID);
+		if (hasTessControl)
+		{
+			glDetachShader(m_programID, tessControlShaderID);
+		}
+		if (hasTessEval)
+		{
+			glDetachShader(m_programID, tessEvaluationShaderID);
+		}
+		if (hasGeometry)
+		{
+			glDetachShader(m_programID, geometryShaderID);
+		}
 
 		glDeleteShader(vertexShaderID);
 		glDeleteShader(fragmentShaderID);
+		if (hasTessControl)
+		{
+			glDeleteShader(m_programID);
+		}
+		if (hasTessEval)
+		{
+			glDeleteShader(m_programID);
+		}
+		if (hasGeometry)
+		{
+			glDeleteShader(m_programID);
+		}
 
 		glUseProgram(m_programID);
 
@@ -183,8 +249,7 @@ namespace snes
 		else
 		{
 			std::cout << "Could not open shader source from " << filePath << std::endl;
-			getchar();
-			return 0;
+			return std::string();
 		}
 		//std::cout << shader << std::endl;
 		return shader;
