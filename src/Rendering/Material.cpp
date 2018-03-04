@@ -4,6 +4,7 @@
 #include "Materials/DiscoMat.h"
 #include "Materials/LitColourMat.h"
 #include "Materials/LitTexturedMat.h"
+#include "Materials/ShadowSolidMat.h"
 #include "Materials/SolidColourMat.h"
 #include "Materials/TessellatedMat.h"
 #include "Materials/UnlitTexturedMat.h"
@@ -92,6 +93,45 @@ namespace snes
 		return material;
 	}
 
+	std::shared_ptr<Material> Material::CreateShadowMaterial(const char* matPath)
+	{
+		std::ifstream params(matPath, std::ios::in);
+
+		if (!params)
+		{
+			std::cout << "Error opening file: " << matPath << std::endl;
+			return std::make_shared<ShadowSolidMat>();
+		}
+
+		std::shared_ptr<Material> material;
+
+		// Determine what material to make, and construct it
+		std::string line;
+		std::getline(params, line);
+
+		if (line == "SOLID_COLOUR" || line == "LIT_COLOUR" || line == "DISCO")
+		{
+			material = std::make_shared<ShadowSolidMat>(params);
+		}
+		else if (line == "UNLIT_TEXTURED" || line == "LIT_TEXTURED")
+		{
+			material = std::make_shared<ShadowSolidMat>(params);	// @TODO: Support transparent textured shadows (e.g. chain-link fences)
+		}
+		else if (line == "TESSELLATED_TEXTURED")
+		{
+			material = std::make_shared<ShadowSolidMat>(params);	// @TODO: Support tessellated shadows
+		}
+		else
+		{
+			material = std::make_shared<ShadowSolidMat>();
+		}
+
+		params.close();
+
+		return material;
+	}
+
+
 	/******************************
 	** Apply all shader uniforms **
 	******************************/
@@ -133,9 +173,9 @@ namespace snes
 
 	void Material::ApplyTransformUniforms(glm::mat4& model, glm::mat4& view, glm::mat4& proj)
 	{
-		m_shader->SetGlUniformMat4("modelMat", model);
-		m_shader->SetGlUniformMat4("viewMat", view);
-		m_shader->SetGlUniformMat4("projMat", proj);
+		SetUniformMat4("modelMat", model);
+		SetUniformMat4("viewMat", view);
+		SetUniformMat4("projMat", proj);
 	}
 
 	void Material::SetUniformMat4(const char* name, glm::mat4 value)

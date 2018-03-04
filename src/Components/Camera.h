@@ -10,10 +10,9 @@ namespace snes
 		Camera(GameObject& gameObject) : Component(gameObject) {}
 		~Camera() {};
 
-		void MainLogic() override;
+		virtual void MainLogic() override;
 
-		/** Set whether this camera is being controlled by the keyboard/mouse */
-		void SetCameraControl(bool on) { m_cameraControl = on; }
+		void SetOrthographic(bool set) { m_orthographic = set; }
 
 		/** @return the projection matrix for this camera */
 		glm::mat4 GetProjMatrix() { return m_projMatrix; }
@@ -23,7 +22,7 @@ namespace snes
 		float GetVerticalFoV();
 		float GetNearClipPlane() { return m_nearClipPlane; }
 
-	private:
+	protected:
 		/** @return the direction the camera is facing in euler angles */
 		glm::vec3 GetCameraDirection();
 		/** Calculate and store the current projection matrix in m_projMatrix */
@@ -31,17 +30,14 @@ namespace snes
 		/** Calculate and store the current view matrix in m_viewMatrix */
 		void CalculateCurrentViewMatrix();
 
-		bool m_cameraControl = false;
+		glm::mat4 m_projMatrix;
+		glm::mat4 m_viewMatrix;
+
+	private:
+		bool m_orthographic = false;
 
 		float m_fieldOfView = 85.0f;
 		float m_nearClipPlane = 0.01f;
 		float m_farClipPlane = 1000.0f;
-
-		float m_xSensitivity = 0.5f;
-		float m_ySensitivity = 0.3f;
-		float m_moveSpeed = 20.0f;
-
-		glm::mat4 m_projMatrix;
-		glm::mat4 m_viewMatrix;
 	};
 }

@@ -98,6 +98,12 @@ namespace snes
 			return "src/rendering/shaders/Billboard";
 		case TESSELLATED_TEXTURED:
 			return "src/rendering/shaders/TessellatedTextured";
+		case SHADOW_SOLID:
+			return "src/rendering/shaders/ShadowPassSolid";
+		case SHADOW_TEXTURED:
+			return "src/rendering/shaders/ShadowPassTextured";
+		case SHADOW_TESSELLATED:
+			return "src/rendering/shaders/ShadowPassTessellated";
 		case DEFERRED_MODEL:
 			return "src/rendering/shaders/DeferredModel";
 		case DEFERRED_LIGHTING_PASS:
@@ -210,15 +216,15 @@ namespace snes
 		glDeleteShader(fragmentShaderID);
 		if (hasTessControl)
 		{
-			glDeleteShader(m_programID);
+			glDeleteShader(tessControlShaderID);
 		}
 		if (hasTessEval)
 		{
-			glDeleteShader(m_programID);
+			glDeleteShader(tessEvaluationShaderID);
 		}
 		if (hasGeometry)
 		{
-			glDeleteShader(m_programID);
+			glDeleteShader(geometryShaderID);
 		}
 
 		glUseProgram(m_programID);

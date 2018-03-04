@@ -3,6 +3,7 @@
 #include "Input.h"
 #include <Components\AABBCollider.h>
 #include <Components\Camera.h>
+#include <Components\ControllableCamera.h>
 #include <Components\CharController.h>
 #include <Components\LODModel.h>
 #include <Components\MeshRenderer.h>
@@ -34,25 +35,29 @@ namespace snes
 
 		// Create camera
 		m_camera = m_root->AddChild().lock();
-		auto camera = m_camera->AddComponent<Camera>();
+		auto camera = m_camera->AddComponent<ControllableCamera>().lock();
 		m_camera->GetTransform().SetLocalPosition(glm::vec3(0, -4.0f, 18.0f));
 		m_camera->GetTransform().SetLocalRotation(glm::vec3(-29.4f, 270.0f, 0.0f));
 
-		std::shared_ptr<DiscoMat> discoMat = std::make_shared<DiscoMat>();
-		std::shared_ptr<UnlitTexturedMat> texturedMat = std::make_shared<UnlitTexturedMat>();
-		texturedMat->SetTexture("Models/Jiggy.bmp");
-
+		// Create directional light
+		m_directionalLight = m_root->AddChild().lock();
+		auto directionalCamera = m_directionalLight->AddComponent<Camera>().lock();
+		auto directionalLight = m_directionalLight->AddComponent<DirectionalLight>().lock();
+		m_directionalLight->GetTransform().SetLocalRotation(glm::vec3(-45.0f, 45.0f, -45.4f));
+		directionalCamera->SetOrthographic(true);
+		directionalLight->SetCamera(directionalCamera);
+		
 		//CreateJiggy(glm::vec3(15, 0, 0), camera.lock(), texturedMat);
 		//CreateJiggy(glm::vec3(-15, 0, 0), camera.lock(), texturedMat);
 		//CreateJiggy(glm::vec3(0, 0, 15), camera.lock(), texturedMat);
-		auto lodReferenceObj = CreateLink(glm::vec3(0, 0, -15), camera.lock());
-		CreateFloor(camera.lock());
+		auto lodReferenceObj = CreateLink(glm::vec3(0, 0, -15), camera);
+		CreateFloor(camera);
 		// Create a ton of spheres
-		for (int i = -35; i < 35; i++)
+		for (int i = -05; i < 15; i++)
 		{
-			for (int j = -15; j < 15; j++)
+			for (int j = -05; j < 15; j++)
 			{
-				//CreateSphere(glm::vec3(i*2, -5, j*2), camera.lock(), lodReferenceObj);
+				CreateSphere(glm::vec3(i*2, 0, j*2), camera, lodReferenceObj);
 			}
 		}
 		// Create a bunch of pretty lights on the floor
@@ -108,18 +113,30 @@ namespace snes
 
 	void Scene::MainDraw()
 	{
-		m_deferredLightingMgr.PrepareNewFrame();
+
+		/** Shadow Pass */
+
+		Material::ResetCurrentShader();	// Tell Material to use a new shader the next time it is asked - this is dumb
+		m_deferredLightingMgr.PrepareNewShadowPass();
+		m_root->MainDraw(SHADOW_PASS, *m_directionalLight->GetComponent<Camera>());
+
+		/** Geometry Pass */
+
+		Material::ResetCurrentShader();
+		m_deferredLightingMgr.PrepareNewGeometryPass();
 
 		if (Input::GetKeyHeld('f'))
 		{
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		}
 		// Render all objects in geometry pass to deferred framebuffer
-		m_root->MainDraw();
+		m_root->MainDraw(GEOMETRY_PASS, *m_camera->GetComponent<Camera>());
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+		/** Lighting */
+
 		// Render deferred lighting
-		m_deferredLightingMgr.RenderLighting(m_camera->GetTransform(), m_pointLights);
+		m_deferredLightingMgr.RenderLighting(m_camera->GetTransform(), m_pointLights, m_directionalLight->GetComponent<DirectionalLight>());
 
 		Mesh::ResetRenderCount();
 	}

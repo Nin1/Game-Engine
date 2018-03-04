@@ -132,6 +132,15 @@
     <ClInclude Include="src\Rendering\Materials\TessellatedMat.h">
       <Filter>Header Files\Rendering\Materials</Filter>
     </ClInclude>
+    <ClInclude Include="src\Components\DirectionalLight.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Materials\ShadowSolidMat.h">
+      <Filter>Header Files\Rendering\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Components\ControllableCamera.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
@@ -226,6 +235,15 @@
     </ClCompile>
     <ClCompile Include="src\Rendering\Materials\TessellatedMat.cpp">
       <Filter>Source Files\Rendering\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Components\DirectionalLight.cpp">
+      <Filter>Source Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Materials\ShadowSolidMat.cpp">
+      <Filter>Source Files\Rendering\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Components\ControllableCamera.cpp">
+      <Filter>Source Files\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -6,6 +6,13 @@
 
 namespace snes
 {
+	const glm::mat4 DeferredLightingManager::BIAS_MATRIX(
+		0.5, 0.0, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.0, 0.5, 0.0,
+		0.5, 0.5, 0.5, 1.0
+	);
+
 	DeferredLightingManager::DeferredLightingManager()
 	{
 	}
@@ -21,6 +28,7 @@ namespace snes
 		m_shader.SetGlUniformSampler2D("gNormal", 1);
 		m_shader.SetGlUniformSampler2D("gAlbedoSpec", 2);
 		m_shader.SetGlUniformSampler2D("gEmissive", 3);
+		m_shader.SetGlUniformSampler2D("gShadowMap", 4);
 
 		uint screenWidth, screenHeight;
 		Application::GetScreenSize(screenWidth, screenHeight);
@@ -75,17 +83,62 @@ namespace snes
 			std::cout << "Error: Framebuffer Incomplete" << std::endl;
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		/* ############################################## */
+
+		// Set up shadow pass buffer
+		glGenFramebuffers(1, &m_shadowFBO);
+		glGenRenderbuffers(1, &m_shadowRT);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_shadowFBO);
+		glBindRenderbuffer(GL_RENDERBUFFER, m_shadowRT);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 1024, 1024);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_shadowRT);
+
+		// Set up depth texture
+		glGenTextures(1, &m_shadowTexture);
+		glBindTexture(GL_TEXTURE_2D, m_shadowTexture);
+		glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowTexture, 0);
+
+		// Check that the framebuffer is complete
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		{
+			std::cout << "Error: Shadow Buffer Incomplete" << std::endl;
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void DeferredLightingManager::PrepareNewFrame()
+	void DeferredLightingManager::PrepareNewGeometryPass()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_buffer);
+		uint screenWidth, screenHeight;
+		Application::GetScreenSize(screenWidth, screenHeight);
+		glViewport(0, 0, screenWidth, screenHeight);
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void DeferredLightingManager::RenderLighting(Transform& camera, std::vector<std::weak_ptr<PointLight>> pointLights)
+	void DeferredLightingManager::PrepareNewShadowPass()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, m_shadowFBO);
+		glViewport(0, 0, 1024, 1024);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+	}
+
+	void DeferredLightingManager::RenderLighting(Transform& camera, std::vector<std::weak_ptr<PointLight>> pointLights, std::shared_ptr<DirectionalLight> directionalLight)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		uint screenWidth, screenHeight;
+		Application::GetScreenSize(screenWidth, screenHeight);
+		glViewport(0, 0, screenWidth, screenHeight);
 		glUseProgram(m_shader.GetProgramID()); 
 
 		if (pointLights.size() > MAX_POINT_LIGHTS)
@@ -110,6 +163,7 @@ namespace snes
 		}
 
 		m_shader.SetGlUniformVec3("viewPos", camera.GetWorldPosition());
+		m_shader.SetGlUniformMat4("shadowVPMat", directionalLight->GetViewProjectionMatrix());
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_position);
@@ -119,6 +173,8 @@ namespace snes
 		glBindTexture(GL_TEXTURE_2D, m_albedoSpecular);
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, m_emissive);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, m_shadowTexture);
 
 		RenderQuad();
 	}

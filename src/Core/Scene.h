@@ -29,6 +29,7 @@ namespace snes
 
 		std::shared_ptr<GameObject> m_root;
 		std::shared_ptr<GameObject> m_camera;
+		std::shared_ptr<GameObject> m_directionalLight;
 
 		std::vector<std::weak_ptr<PointLight>> m_pointLights;
 

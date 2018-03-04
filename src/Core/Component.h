@@ -4,6 +4,13 @@ namespace snes
 {
 	class GameObject;
 	class Transform;
+	class Camera;
+
+	enum RenderPass
+	{
+		GEOMETRY_PASS,
+		SHADOW_PASS
+	};
 
 	/** Component base class
 	  * Inherit from this to create new component types */
@@ -27,7 +34,7 @@ namespace snes
 		virtual void MainLogic() {};
 
 		/** Component function called at the end of each frame */
-		virtual void MainDraw() {};
+		virtual void MainDraw(RenderPass renderPass, Camera& camera) {};
 
 		/** Component function called whenever the component or parent GameObject is destroyed */
 		virtual void OnDestroy() {};

@@ -11,7 +11,7 @@ namespace snes
 	struct LODValue
 	{
 		LODModel* model;
-		int meshIndex;
+		uint meshIndex;
 		float cost;
 		float value;
 	};
@@ -31,7 +31,7 @@ namespace snes
 
 		void FixedLogic() override;
 		void MainLogic() override;
-		void MainDraw() override;
+		void MainDraw(RenderPass renderPass, Camera& camera) override;
 
 		/** Return the index of the best LOD to show */
 		int GetCurrentLOD() const;
@@ -56,14 +56,14 @@ namespace snes
 		static float m_maxCost;
 
 	private:
-		void DrawCurrentMesh(Camera& camera);
+		void DrawCurrentMesh(RenderPass renderPass, Camera& camera);
 		/** Draw the last mesh with a stipple effect fading out */
-		void DrawLastMesh(Camera& camera);
+		void DrawLastMesh(RenderPass renderPass, Camera& camera);
 		/** Generate a stipple pattern between 0 (invisible) and 1 (visible) */
 		void GenerateStipplePattern(float opacity, GLubyte patternOut[128]);
 		void InvertStipplePattern(GLubyte patternOut[128]);
 		/** Calculate the model/view/proj matrices and apply them to the material */
-		void PrepareTransformUniforms(Camera& camera, Material& mat);
+		void PrepareTransformUniforms(Camera& camera, Material* mat);
 		/** Cost/Benefit method for finding the best LOD to show */
 		int CalculateEachLODValue();
 		float GetScreenSizeOfMesh(int index);
@@ -79,6 +79,7 @@ namespace snes
 		  * e.g. m_meshes[0] = LOD0 = highest detail */
 		std::vector<std::shared_ptr<Mesh>> m_meshes;
 		std::vector<std::shared_ptr<Material>> m_materials;
+		std::vector<std::shared_ptr<Material>> m_shadowMaterials;
 
 		/** Distance from camera that the lowest LOD is used */
 		float m_distanceLow = 100;
@@ -100,7 +101,7 @@ namespace snes
 		/** The time remaining until the transition from one LOD to another is finished (in seconds) */
 		float m_transitionRemainingS = 0.0f;
 		/** The cost of the currently selected mesh */
-		uint m_shownMeshCost = 0;
-		uint m_lastMeshCost = 0;
+		float m_shownMeshCost = 0;
+		float m_lastMeshCost = 0;
 	};
 }

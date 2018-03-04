@@ -4,8 +4,28 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
+#define OPENGL_DEBUG 1
+
 namespace snes
 {
+	static void APIENTRY openglCallbackFunction(
+		GLenum source,
+		GLenum type,
+		GLuint id,
+		GLenum severity,
+		GLsizei length,
+		const GLchar* message,
+		const void* userParam
+	) {
+		(void)source; (void)type; (void)id;
+		(void)severity; (void)length; (void)userParam;
+		fprintf(stderr, "%s\n", message);
+		if (severity == GL_DEBUG_SEVERITY_HIGH) {
+			fprintf(stderr, "Aborting...\n");
+			//abort();
+		}
+	}
+
 	FrameTime Application::m_frameTime;
 	Input Application::m_input;
 	Scene Application::m_currentScene;
@@ -66,6 +86,13 @@ namespace snes
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
+
+#if OPENGL_DEBUG == 1
+		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(openglCallbackFunction, nullptr);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, true);
+#endif
 
 		m_currentScene.InitialiseScene();
     }

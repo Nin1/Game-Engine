@@ -59,6 +59,7 @@ namespace snes
 			// Read current LOD material file
 			std::getline(lodFile, line);
 			m_materials.push_back(Material::CreateMaterial(line.c_str()));
+			m_shadowMaterials.push_back(Material::CreateShadowMaterial(line.c_str()));
 		}
 
 		if (m_meshes.size() == 0)
@@ -116,28 +117,25 @@ namespace snes
 		}
 	}
 
-	void LODModel::MainDraw()
+	void LODModel::MainDraw(RenderPass renderPass, Camera& camera)
 	{
-		auto camera = m_camera.lock();
-		if (!camera.get())
+		if (renderPass == GEOMETRY_PASS)
 		{
-			return;
+			if (m_currentMesh != m_lastRenderedMesh && m_transitionRemainingS <= 0.0f)
+			{
+				// The displayed mesh has changed - begin a transition
+				m_transitioningFromMesh = m_lastRenderedMesh;	// Set the last mesh as one to fade out
+				m_lastRenderedMesh = m_currentMesh;
+				m_transitionRemainingS = TRANSITION_DURATION_S;
+			}
 		}
 
-		if (m_currentMesh != m_lastRenderedMesh && m_transitionRemainingS <= 0.0f)
-		{
-			// The displayed mesh has changed - begin a transition
-			m_transitioningFromMesh = m_lastRenderedMesh;	// Set the last mesh as one to fade out
-			m_lastRenderedMesh = m_currentMesh;
-			m_transitionRemainingS = TRANSITION_DURATION_S;
-		}
-
-		DrawCurrentMesh(*camera);
+		DrawCurrentMesh(renderPass, camera);
 
 		if (m_transitionRemainingS > 0.0f)
 		{
 			// Draw previously selected mesh if transitioning
-			DrawLastMesh(*camera);
+			DrawLastMesh(renderPass, camera);
 		}
 
 		glDisable(GL_POLYGON_STIPPLE);
@@ -147,11 +145,18 @@ namespace snes
 		glBindVertexArray(0);
 	}
 
-	void LODModel::DrawCurrentMesh(Camera& camera)
+	void LODModel::DrawCurrentMesh(RenderPass renderPass, Camera& camera)
 	{
-		m_materials[m_lastRenderedMesh]->PrepareForRendering(m_transform);
+		Material* material = m_materials[m_lastRenderedMesh].get();
+
+		if (renderPass == SHADOW_PASS)
+		{
+			//material = m_shadowMaterials[m_lastRenderedMesh].get();
+		}
+
+		PrepareTransformUniforms(camera, material);
+		material->PrepareForRendering(m_transform);
 		m_meshes[m_lastRenderedMesh]->PrepareForRendering();
-		PrepareTransformUniforms(camera, *m_materials[m_lastRenderedMesh]);
 
 		if (m_transitionRemainingS > 0.0f)
 		{
@@ -162,7 +167,7 @@ namespace snes
 		}
 
 		// Draw the mesh
-		if (m_materials[m_lastRenderedMesh]->GetUsePatches())
+		if (material->GetUsePatches())
 		{
 			glDrawArrays(GL_PATCHES, 0, m_meshes[m_lastRenderedMesh]->GetVertexCount());
 		}
@@ -170,13 +175,21 @@ namespace snes
 		{
 			glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_lastRenderedMesh]->GetVertexCount());
 		}
+
 	}
 
-	void LODModel::DrawLastMesh(Camera& camera)
+	void LODModel::DrawLastMesh(RenderPass renderPass, Camera& camera)
 	{
-		m_materials[m_transitioningFromMesh]->PrepareForRendering(m_transform);
+		Material* material = m_materials[m_transitioningFromMesh].get();
+
+		if (renderPass == SHADOW_PASS)
+		{
+			//material = m_shadowMaterials[m_transitioningFromMesh].get();
+		}
+
+		PrepareTransformUniforms(camera, material);
+		material->PrepareForRendering(m_transform);
 		m_meshes[m_transitioningFromMesh]->PrepareForRendering();
-		PrepareTransformUniforms(camera, *m_materials[m_transitioningFromMesh]);
 
 		if (m_transitionRemainingS > 0.0f)
 		{
@@ -188,7 +201,7 @@ namespace snes
 		}
 
 		// Draw the mesh
-		if (m_materials[m_transitioningFromMesh]->GetUsePatches())
+		if (material->GetUsePatches())
 		{
 			glDrawElements(GL_PATCHES, m_meshes[m_transitioningFromMesh]->GetNumFaces(), GL_UNSIGNED_INT, 0);
 		}
@@ -231,7 +244,7 @@ namespace snes
 		}
 	}
 
-	void LODModel::PrepareTransformUniforms(Camera& camera, Material& mat)
+	void LODModel::PrepareTransformUniforms(Camera& camera, Material* mat)
 	{
 		auto transform = m_gameObject.GetTransform();
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), transform.GetWorldScale());
@@ -243,7 +256,7 @@ namespace snes
 		glm::mat4 viewMat = camera.GetViewMatrix();
 		glm::mat4 projMat = camera.GetProjMatrix();
 
-		mat.ApplyTransformUniforms(modelMat, viewMat, projMat);
+		mat->ApplyTransformUniforms(modelMat, viewMat, projMat);
 	}
 
 	const std::weak_ptr<Mesh> LODModel::GetMesh(uint lodLevel) const
@@ -269,7 +282,7 @@ namespace snes
 		int bestIndex = 0;
 		float bestValue = 0;
 		
-		for (int i = 0; i < m_meshes.size(); i++)
+		for (uint i = 0; i < m_meshes.size(); i++)
 		{
 			uint numFaces = m_meshes[i]->GetNumFaces();	// @TODO: Calculate a proper cost heuristic
 			uint numVertices = m_meshes[i]->GetVertexCount();
@@ -359,7 +372,7 @@ namespace snes
 			return a.value > b.value;
 		});
 
-		int i = 0;
+		uint i = 0;
 		while (m_totalCost < m_maxCost && i < m_lodValues.size())
 		{
 			m_lodValues[i].model->SetCurrentLOD(m_lodValues[i]);

@@ -1,5 +1,6 @@
 #pragma once
 #include "ShaderProgram.h"
+#include <Components\Transform.h>
 #include <map>
 
 namespace snes
@@ -17,12 +18,14 @@ namespace snes
 		virtual void PrepareForRendering(Transform& transform) { this->PrepareForRendering(); }
 
 		/** Set the model, view, and projection uniforms (these must be present in every material shader) */
-		void ApplyTransformUniforms(glm::mat4& model, glm::mat4& view, glm::mat4& proj);
+		virtual void ApplyTransformUniforms(glm::mat4& model, glm::mat4& view, glm::mat4& proj);
 
 		bool GetUsePatches() { return m_usePatches; }
 
 	public:
 		static std::shared_ptr<Material> CreateMaterial(const char* matPath);
+		static std::shared_ptr<Material> CreateShadowMaterial(const char* matPath);
+		static void ResetCurrentShader() { m_currentShader = NONE; }
 
 	protected:
 		Material(ShaderName shaderName);
@@ -42,7 +45,7 @@ namespace snes
 		static std::map<ShaderName, std::weak_ptr<ShaderProgram>> m_shaders;
 
 	private:
-		ShaderName m_shaderName;
+		ShaderName m_shaderName; 
 
 		std::shared_ptr<ShaderProgram> m_shader;
 

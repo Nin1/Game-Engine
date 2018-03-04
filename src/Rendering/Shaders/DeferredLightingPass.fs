@@ -8,6 +8,7 @@ uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
 uniform sampler2D gEmissive;
+uniform sampler2D gShadowMap;
 
 struct PointLight
 {
@@ -20,8 +21,25 @@ const int MAX_POINT_LIGHTS = 32; // See DeferredLightingManager.h
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 
 uniform vec3 viewPos;
+uniform mat4 shadowVPMat;
 
 const float AMBIENT = 0.5;
+
+const vec2 POISSONDISK[4] = vec2[](
+  vec2( -0.94201624, -0.39906216 ),
+  vec2( 0.94558609, -0.76890725 ),
+  vec2( -0.094184101, -0.92938870 ),
+  vec2( 0.34495938, 0.29387760 )
+);
+
+// TODO: Remove this function (useful for viewing depth)
+float GetLinearShadowMap(in vec2 uv)
+{
+    float zNear = 0.5;    // TODO: Replace by the zNear of your perspective projection
+    float zFar  = 2000.0; // TODO: Replace by the zFar  of your perspective projection
+    float depth = texture2D(gShadowMap, uv).x;
+    return (2.0 * zNear) / (zFar + zNear - depth * (zFar - zNear));
+}
 
 void main()
 {
@@ -31,6 +49,17 @@ void main()
     vec3 albedo = texture(gAlbedoSpec, texCoord).rgb;
     vec3 emissive = texture(gEmissive, texCoord).rgb;
     float specularAmount = texture(gAlbedoSpec, texCoord).a;
+
+	vec4 shadowSpacePos = shadowVPMat * vec4(fragPos, 1.0);
+	shadowSpacePos /= shadowSpacePos.w;
+	shadowSpacePos = shadowSpacePos * vec4(0.5) + vec4(0.5);
+
+	for(int i = 0; i < 4; i++)
+	{
+		float shadowDepth = texture2D(gShadowMap, shadowSpacePos.xy + POISSONDISK[i]/700.0).x;
+		albedo = (shadowSpacePos.z > shadowDepth + 0.01) ? albedo - 0.1 : albedo;
+	}
+
     
     // then calculate lighting as usual
     vec3 lighting  = albedo * AMBIENT + emissive;
@@ -52,4 +81,5 @@ void main()
         lighting += diffuse + specular;        
     }
     fragColour = vec4(lighting, 1.0);
+	//fragColour = texture2D(gShadowMap, texCoord);
 }

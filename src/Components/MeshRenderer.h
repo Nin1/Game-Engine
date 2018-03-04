@@ -11,7 +11,7 @@ namespace snes
 		MeshRenderer(GameObject& gameObject);
 		~MeshRenderer();
 
-		void MainDraw() override;
+		void MainDraw(RenderPass renderPass, Camera& camera) override;
 
 		/** Sets the mesh to be rendered */
 		void SetMesh(const char* meshFile) { m_mesh = Mesh::GetMesh(meshFile); }

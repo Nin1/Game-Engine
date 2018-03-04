@@ -18,10 +18,9 @@ namespace snes
 	{
 	}
 
-	void MeshRenderer::MainDraw()
+	void MeshRenderer::MainDraw(RenderPass renderPass, Camera& camera)
 	{
-		auto camera = m_camera.lock();
-		if (!camera.get() || !m_material.get() || !m_mesh.get())
+		if ( !m_material.get() || !m_mesh.get())
 		{
 			return;
 		}
@@ -30,7 +29,7 @@ namespace snes
 
 		// Set up shaders and uniforms
 		m_material->PrepareForRendering();
-		PrepareTransformUniforms(*camera);
+		PrepareTransformUniforms(camera);
 
 		// Draw the mesh
 		glDrawArrays(GL_TRIANGLES, 0, m_mesh->GetVertexCount());

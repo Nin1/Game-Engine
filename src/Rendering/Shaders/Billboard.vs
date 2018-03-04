@@ -34,4 +34,5 @@ void main()
 	gl_Position = projMat * viewMat * vec4(vertexWorldPos, 1);
 	fragPos = vertexWorldPos;
 	vNormal = -cameraForward;
+	modelMat;
 }

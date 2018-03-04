@@ -58,16 +58,16 @@ namespace snes
 		}
 	}
 
-	void GameObject::MainDraw()
+	void GameObject::MainDraw(RenderPass renderPass, Camera& camera)
 	{
 		for (auto& child : m_children)
 		{
-			child->MainDraw();
+			child->MainDraw(renderPass, camera);
 		}
 
 		for (auto& component : m_components)
 		{
-			component->MainDraw();
+			component->MainDraw(renderPass, camera);
 		}
 	}
 

@@ -3,6 +3,8 @@
 
 namespace snes
 {
+
+
 	class GameObject : public std::enable_shared_from_this<GameObject>
 	{
 	public:
@@ -14,7 +16,7 @@ namespace snes
 		/** Run logic on all children and components every frame */
 		void MainLogic();
 		/** Run MainDraw on all children and components every frame */
-		void MainDraw();
+		void MainDraw(RenderPass renderPass, Camera& camera);
 		/** Run OnCollision events on all children and components */
 		void OnCollision(GameObject& other);
 
