@@ -7,7 +7,7 @@ namespace snes
 	class DirectionalLight : public Component
 	{
 	public:
-		DirectionalLight(GameObject& gameObject) : Component(gameObject) {};
+		DirectionalLight(GameObject& gameObject) : Component(gameObject), m_colour(1.0) {};
 		~DirectionalLight() {};
 
 		/** Set the colour of the pointlight */
@@ -18,6 +18,8 @@ namespace snes
 		void SetCamera(std::shared_ptr<Camera> camera) { m_camera = camera; }
 
 		glm::mat4 GetViewProjectionMatrix() { return m_camera->GetProjMatrix() * m_camera->GetViewMatrix(); }
+		glm::mat4 GetViewMatrix() { return m_camera->GetViewMatrix(); }
+		glm::mat4 GetProjectionMatrix() { return m_camera->GetProjMatrix(); }
 
 		void MainLogic() override;
 

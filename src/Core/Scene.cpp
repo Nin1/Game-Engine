@@ -50,29 +50,29 @@ namespace snes
 		//CreateJiggy(glm::vec3(15, 0, 0), camera.lock(), texturedMat);
 		//CreateJiggy(glm::vec3(-15, 0, 0), camera.lock(), texturedMat);
 		//CreateJiggy(glm::vec3(0, 0, 15), camera.lock(), texturedMat);
-		auto lodReferenceObj = CreateLink(glm::vec3(0, 0, -15), camera);
+		auto lodReferenceObj = CreateLink(glm::vec3(-15, -6, -15), camera);
 		CreateFloor(camera);
 		// Create a ton of spheres
-		for (int i = -05; i < 15; i++)
+		for (int i = -10; i < 10; i++)
 		{
-			for (int j = -05; j < 15; j++)
+			for (int j = -10; j < 10; j++)
 			{
 				CreateSphere(glm::vec3(i*2, 0, j*2), camera, lodReferenceObj);
 			}
 		}
 		// Create a bunch of pretty lights on the floor
-		CreatePointLight(*m_root, glm::vec3(10, 0, 0), glm::vec3(1, 0, 1));
-		CreatePointLight(*m_root, glm::vec3(-10, 0, 0), glm::vec3(1, 1, 0));
-		CreatePointLight(*m_root, glm::vec3(0, 0, 10), glm::vec3(0, 1, 1));
-		CreatePointLight(*m_root, glm::vec3(0, 0, -10), glm::vec3(1, 0, 0));
-		CreatePointLight(*m_root, glm::vec3(-10, 0, 10), glm::vec3(0, 1, 0));
-		CreatePointLight(*m_root, glm::vec3(10, 0, 10), glm::vec3(0, 0, 1));
-		CreatePointLight(*m_root, glm::vec3(10, 0, -10), glm::vec3(1, 1, 1));
-		CreatePointLight(*m_root, glm::vec3(-10, 0, -10), glm::vec3(1, 1, 1));
-		// Create a big light in the center of the scene
-		GameObject& bigLight = CreatePointLight(*m_root, glm::vec3(0, 0, 0), glm::vec3(1, 1, 1));
+		CreatePointLight(*m_root, glm::vec3(10, -6, 0), glm::vec3(1, 0, 1));
+		CreatePointLight(*m_root, glm::vec3(-10, -6, 0), glm::vec3(1, 1, 0));
+		CreatePointLight(*m_root, glm::vec3(0, -6, 10), glm::vec3(0, 1, 1));
+		CreatePointLight(*m_root, glm::vec3(0, -6, -10), glm::vec3(1, 0, 0));
+		CreatePointLight(*m_root, glm::vec3(-10, -6, 10), glm::vec3(0, 1, 0));
+		CreatePointLight(*m_root, glm::vec3(10, -6, 10), glm::vec3(0, 0, 1));
+		CreatePointLight(*m_root, glm::vec3(10, -6, -10), glm::vec3(1, 1, 1));
+		CreatePointLight(*m_root, glm::vec3(-10, -6, -10), glm::vec3(1, 1, 1));
+		/*/ Create a big light in the center of the scene
+		GameObject& bigLight = CreatePointLight(*m_root, glm::vec3(10, -6, -10), glm::vec3(0, 1, 1));
 		bigLight.GetComponent<PointLight>()->SetLinearAttenuation(0.001f);
-		bigLight.GetComponent<PointLight>()->SetQuadraticAttenuation(0.002f);
+		bigLight.GetComponent<PointLight>()->SetQuadraticAttenuation(0.002f);*/
 	}
 
 	void Scene::FixedLogic()
@@ -84,7 +84,7 @@ namespace snes
 		LODModel::SortAndSetLODValues();
 		
 		// Generate list of all GameObjects
-		std::vector<std::weak_ptr<GameObject>> allObjects = m_root->GetAllChildren();
+		//std::vector<std::weak_ptr<GameObject>> allObjects = m_root->GetAllChildren();
 
 		// Handle collision between all GameObjects once
 		/*
@@ -136,7 +136,7 @@ namespace snes
 		/** Lighting */
 
 		// Render deferred lighting
-		m_deferredLightingMgr.RenderLighting(m_camera->GetTransform(), m_pointLights, m_directionalLight->GetComponent<DirectionalLight>());
+		m_deferredLightingMgr.RenderLighting(m_camera->GetComponent<Camera>(), m_pointLights, m_directionalLight->GetComponent<DirectionalLight>());
 
 		Mesh::ResetRenderCount();
 	}
@@ -148,6 +148,8 @@ namespace snes
 
 		auto& pointLight = light->AddComponent<PointLight>().lock();
 		pointLight->SetColour(colour);
+		pointLight->SetLinearAttenuation(0.01f);
+		pointLight->SetQuadraticAttenuation(0.02f);
 
 		// @TODO: Replace vector with GetComponentsOfType<PointLight>()
 		m_pointLights.push_back(pointLight);
@@ -206,11 +208,11 @@ namespace snes
 		// Create the test jiggy
 		auto link = m_root->AddChild().lock();
 		link->GetTransform().SetLocalPosition(pos);
-		link->GetTransform().SetLocalScale(glm::vec3(0.1f, 0.1f, 0.1f));
+		link->GetTransform().SetLocalScale(glm::vec3(1.0f, 1.0f, 1.0f));
 
 		auto& lodModel = link->AddComponent<LODModel>().lock();
 		lodModel->SetCamera(camera);
-		lodModel->Load("Models/testSphere");
+		lodModel->Load("Models/charizard");
 
 		// Add Rigidbody and collider
 		link->AddComponent<Rigidbody>();

@@ -5,6 +5,8 @@ layout(location = 1) in vec3 vNormalIn;
 uniform mat4 modelMat;
 uniform mat4 viewMat;
 uniform mat4 projMat;
+uniform mat4 projViewMat;
+uniform mat4 normalMat;
 
 out vec3 fragPos;
 out vec3 vNormal;
@@ -12,7 +14,7 @@ out vec3 vNormal;
 void main()
 {
 	vec4 worldPos = modelMat * vec4(vModelSpacePos, 1);
-	gl_Position = projMat * viewMat * worldPos;
+	gl_Position = projViewMat * worldPos;
 	fragPos = worldPos.rgb;
-	vNormal = normalize(mat3(transpose(inverse(modelMat))) * vNormalIn);
+	vNormal = (normalMat * vec4(vNormalIn, 0)).xyz;
 }

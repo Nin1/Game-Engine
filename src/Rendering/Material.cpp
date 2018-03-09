@@ -176,6 +176,8 @@ namespace snes
 		SetUniformMat4("modelMat", model);
 		SetUniformMat4("viewMat", view);
 		SetUniformMat4("projMat", proj);
+		SetUniformMat4("projViewMat", proj * view);
+		SetUniformMat4("normalMat", glm::transpose(glm::inverse(view * model)));
 	}
 
 	void Material::SetUniformMat4(const char* name, glm::mat4 value)

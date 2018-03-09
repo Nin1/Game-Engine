@@ -106,6 +106,7 @@ namespace snes
 		m_currentMesh = 0;
 		m_shownMeshCost = 0;
 		CalculateEachLODValue();
+		//PickBestMesh();
 	}
 
 	void LODModel::MainLogic()
@@ -270,6 +271,23 @@ namespace snes
 			// No valid mesh chosen, return null pointer
 			return std::weak_ptr<Mesh>();
 		}
+	}
+
+	void LODModel::PickBestMesh()
+	{
+		float distanceFromCamera = glm::length(m_camera.lock()->GetTransform().GetWorldPosition() - m_transform.GetWorldPosition());
+
+		m_currentMesh = m_meshes.size() - 1;
+		if (distanceFromCamera < 200)
+			m_currentMesh = m_currentMesh - 1;
+		if (distanceFromCamera < 30)
+			m_currentMesh = m_currentMesh - 1;
+		if (distanceFromCamera < 20)
+			m_currentMesh = m_currentMesh - 1;
+		if (distanceFromCamera < 10)
+			m_currentMesh = m_currentMesh - 1;
+
+		m_currentMesh = std::max((int)m_currentMesh, 0);
 	}
 
 	int LODModel::CalculateEachLODValue()

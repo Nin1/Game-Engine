@@ -6,6 +6,8 @@ layout(location = 2) in vec3 vNormalIn;
 uniform mat4 modelMat;
 uniform mat4 viewMat;
 uniform mat4 projMat;
+uniform mat4 projViewMat;
+uniform mat4 normalMat;
 
 // The center position of the billboard object
 uniform vec3 centerWorldPos;
@@ -31,7 +33,7 @@ void main()
 		+ cameraRight * vModelSpacePos.z * worldScale.z
 		+ cameraUp * vModelSpacePos.y * worldScale.x;
 
-	gl_Position = projMat * viewMat * vec4(vertexWorldPos, 1);
+	gl_Position = projViewMat * vec4(vertexWorldPos, 1);
 	fragPos = vertexWorldPos;
-	vNormal = vNormalIn;
+	vNormal = -cameraForward;
 }

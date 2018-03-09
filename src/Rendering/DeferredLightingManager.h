@@ -21,7 +21,7 @@ namespace snes
 		/** Set up a new shadow pass */
 		void PrepareNewShadowPass();
 		/** Render the contents of the framebuffer, lit by the pointlights */
-		void RenderLighting(Transform& camera, std::vector<std::weak_ptr<PointLight>> pointLights, std::shared_ptr<DirectionalLight> directionalLight);
+		void RenderLighting(std::shared_ptr<Camera> camera, std::vector<std::weak_ptr<PointLight>> pointLights, std::shared_ptr<DirectionalLight> directionalLight);
 
 	private:
 		/** Render a quad to the screen */

@@ -32,14 +32,20 @@ namespace snes
 			SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
 		);
 
-		std::getline(params, texturePath);
-
-		m_dispMapID = SOIL_load_OGL_texture(
-			texturePath.c_str(),
-			SOIL_LOAD_AUTO,
-			SOIL_CREATE_NEW_ID,
-			SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
-		);
+		if (std::getline(params, texturePath))
+		{
+			m_dispMapID = SOIL_load_OGL_texture(
+				texturePath.c_str(),
+				SOIL_LOAD_AUTO,
+				SOIL_CREATE_NEW_ID,
+				SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+			);
+			SetUniformBool("hasDispMap", true);
+		}
+		else
+		{
+			SetUniformBool("hasDispMap", false);
+		}
 		m_usePatches = true;
 	}
 
@@ -54,7 +60,14 @@ namespace snes
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_textureID);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, m_dispMapID);
+		if (m_dispMapID != -1)
+		{
+			glBindTexture(GL_TEXTURE_2D, m_dispMapID);
+		}
+		else
+		{
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 		glPatchParameteri(GL_PATCH_VERTICES, 3);
 	}
 

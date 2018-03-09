@@ -66,6 +66,8 @@ namespace snes
 		void PrepareTransformUniforms(Camera& camera, Material* mat);
 		/** Cost/Benefit method for finding the best LOD to show */
 		int CalculateEachLODValue();
+		/** Very cheap and probably incorrect estimation of what LOD to show */
+		void PickBestMesh();
 		float GetScreenSizeOfMesh(int index);
 		void SetCurrentLOD(LODValue& lodValue);
 

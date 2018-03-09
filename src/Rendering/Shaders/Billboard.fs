@@ -24,11 +24,11 @@ void main()
 	// Fragment position vector
 	gPosition = fragPos;
 	// Fragment normal
-	if(useNormalMap)
+	//if(useNormalMap)
 	{
-		gNormal = vNormal + texture(normal, texCoord).rgb;
+	//	gNormal = vNormal + texture(normal, texCoord).rgb;
 	}
-	else
+	//else
 	{
 		gNormal = vNormal;
 	}

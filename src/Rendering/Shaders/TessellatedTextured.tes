@@ -13,7 +13,10 @@ out vec3 teNormal;
 uniform mat4 modelMat;
 uniform mat4 viewMat;
 uniform mat4 projMat;
+uniform mat4 projViewMat;
+uniform mat4 normalMat;
 
+uniform bool hasDispMap;
 uniform sampler2D dispMap;
 uniform float magnitude;
 
@@ -34,12 +37,20 @@ void main()
 	vec2 tc2 = gl_TessCoord.z * tcTexCoord[2];
 	teTexCoord = tc0 + tc1 + tc2;
 
-	float height = texture(dispMap, teTexCoord).x;
+	float height;
+	if(hasDispMap)
+	{
+		height = texture(dispMap, teTexCoord).x;
+	}
+	else
+	{
+		height = 0.0f;
+	}
 	pos += normal * height * magnitude;
 
 	teFragPos = (modelMat * vec4(pos, 1)).xyz;
-	gl_Position = projMat * viewMat * vec4(teFragPos, 1);
+	gl_Position = projViewMat * vec4(teFragPos, 1);
 
 	tePosition = (viewMat * vec4(teFragPos, 1)).xyz;
-	teNormal = (viewMat * modelMat * vec4(normal, 0)).xyz;
+	teNormal = normalize((normalMat * vec4(normal, 0)).xyz);
 }

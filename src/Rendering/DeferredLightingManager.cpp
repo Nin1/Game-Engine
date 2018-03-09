@@ -102,7 +102,7 @@ namespace snes
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 2048, 2048, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowTexture, 0);
 
@@ -127,13 +127,13 @@ namespace snes
 	void DeferredLightingManager::PrepareNewShadowPass()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_shadowFBO);
-		glViewport(0, 0, 1024, 1024);
+		glViewport(0, 0, 2048, 2048);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		glDrawBuffer(GL_NONE);
 		glReadBuffer(GL_NONE);
 	}
 
-	void DeferredLightingManager::RenderLighting(Transform& camera, std::vector<std::weak_ptr<PointLight>> pointLights, std::shared_ptr<DirectionalLight> directionalLight)
+	void DeferredLightingManager::RenderLighting(std::shared_ptr<Camera> camera, std::vector<std::weak_ptr<PointLight>> pointLights, std::shared_ptr<DirectionalLight> directionalLight)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		uint screenWidth, screenHeight;
@@ -162,8 +162,12 @@ namespace snes
 			}
 		}
 
-		m_shader.SetGlUniformVec3("viewPos", camera.GetWorldPosition());
+		m_shader.SetGlUniformVec3("viewPos", camera->GetTransform().GetWorldPosition());
+		m_shader.SetGlUniformMat4("cameraViewMat", camera->GetViewMatrix());
 		m_shader.SetGlUniformMat4("shadowVPMat", directionalLight->GetViewProjectionMatrix());
+		m_shader.SetGlUniformVec3("eyeSpaceLightPos", camera->GetViewMatrix() * glm::vec4(directionalLight->GetTransform().GetWorldPosition(), 1.0f));
+		m_shader.SetGlUniformVec3("directionalLightColour", directionalLight->GetColour());
+		m_shader.SetGlUniformVec3("directionalLightEyeDirection", camera->GetViewMatrix() * glm::vec4(directionalLight->GetTransform().GetWorldRotation(), 0.0f));
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_position);
