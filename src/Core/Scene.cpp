@@ -16,6 +16,7 @@
 #include <Rendering\Materials\LitTexturedMat.h>
 #include <Rendering\Materials\SolidColourMat.h>
 #include <Rendering\Materials\UnlitTexturedMat.h>
+#include <Rendering\Materials\TessellatedMat.h>
 
 namespace snes
 {
@@ -57,7 +58,7 @@ namespace snes
 		{
 			for (int j = -10; j < 10; j++)
 			{
-				CreateSphere(glm::vec3(i*2, 0, j*2), camera, lodReferenceObj);
+				//CreateSphere(glm::vec3(i*2, 0, j*2), camera, lodReferenceObj);
 			}
 		}
 		// Create a bunch of pretty lights on the floor
@@ -77,12 +78,17 @@ namespace snes
 
 	void Scene::FixedLogic()
 	{
+		if (Input::GetKeyDown('t'))
+		{
+			TessellatedMat::ToggleTessellation();
+		}
+
 		LODModel::StartNewFrame();
 
 		m_root->FixedLogic();
 
 		LODModel::SortAndSetLODValues();
-		
+
 		// Generate list of all GameObjects
 		//std::vector<std::weak_ptr<GameObject>> allObjects = m_root->GetAllChildren();
 
@@ -209,10 +215,11 @@ namespace snes
 		auto link = m_root->AddChild().lock();
 		link->GetTransform().SetLocalPosition(pos);
 		link->GetTransform().SetLocalScale(glm::vec3(1.0f, 1.0f, 1.0f));
+		link->GetTransform().SetLocalRotation(glm::vec3(0, 180, 0));
 
 		auto& lodModel = link->AddComponent<LODModel>().lock();
 		lodModel->SetCamera(camera);
-		lodModel->Load("Models/charizard");
+		lodModel->Load("Models/crash");
 
 		// Add Rigidbody and collider
 		link->AddComponent<Rigidbody>();

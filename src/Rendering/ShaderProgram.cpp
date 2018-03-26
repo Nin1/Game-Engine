@@ -97,7 +97,7 @@ namespace snes
 		case BILLBOARD:
 			return "src/rendering/shaders/Billboard";
 		case TESSELLATED_TEXTURED:
-			return "src/rendering/shaders/TessellatedTextured";
+			return "src/rendering/shaders/PhongTessellated";
 		case SHADOW_SOLID:
 			return "src/rendering/shaders/ShadowPassSolid";
 		case SHADOW_TEXTURED:

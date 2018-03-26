@@ -2,6 +2,7 @@
 #include "Mesh.h"
 #include <Core\GameObject.h>
 #include <Components\Transform.h>
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <ostream>
@@ -54,8 +55,10 @@ namespace snes
 		while (std::getline(modelFile, line))
 		{
 			std::istringstream lineStream(line);
+			lineStream.imbue(std::locale(lineStream.getloc(), new ObjLoadDelimiters));
+
 			std::string mode;
-			std::getline(lineStream, mode, ' ');
+			lineStream >> mode;
 
 			if (mode == "v")
 			{
@@ -109,51 +112,48 @@ namespace snes
 				// Load attributes for each vertex in a face
 				for (int i = 0; i < 3; ++i)
 				{
-					std::string attribIndex;
-					char delimiter = '/';
-					if (faceAttributeCount >= 1)
+					if (tempVerts.size() > 0)
 					{
-						if (faceAttributeCount == 1)
-						{
-							delimiter = ' ';
-						}
-						std::getline(lineStream, attribIndex, delimiter);
-						vertIndex[i] = std::stoi(attribIndex);
+						lineStream >> vertIndex[i];
 					}
-					if (faceAttributeCount >= 2)
+					if (tempUVs.size() > 0)
 					{
-						if (faceAttributeCount == 2)
+						if (faceAttributeCount >= 2)
 						{
-							delimiter = ' ';
+							lineStream >> uvIndex[i];
 						}
-						std::getline(lineStream, attribIndex, delimiter);
-						uvIndex[i] = std::stoi(attribIndex);
+						else
+						{
+							uvIndex[i] = vertIndex[i];
+						}
 					}
-					if (faceAttributeCount >= 3)
+					if (tempNormals.size() > 0)
 					{
-						if (faceAttributeCount == 3)
+						if (faceAttributeCount >= 3)
 						{
-							delimiter = ' ';
+							lineStream >> normalIndex[i];
 						}
-						std::getline(lineStream, attribIndex, delimiter);
-						normalIndex[i] = std::stoi(attribIndex);
+						else
+						{
+							normalIndex[i] = vertIndex[i];
+						}
 					}
 				}
 
 				// Store all vertex, uv, and normal indices for this face
-				if (faceAttributeCount >= 1)
+				if (tempVerts.size() > 0)
 				{
 					vertIndices.push_back(vertIndex[0]);
 					vertIndices.push_back(vertIndex[1]);
 					vertIndices.push_back(vertIndex[2]);
 				}
-				if (faceAttributeCount >= 2)
+				if (tempUVs.size() > 0)
 				{
 					uvIndices.push_back(uvIndex[0]);
 					uvIndices.push_back(uvIndex[1]);
 					uvIndices.push_back(uvIndex[2]);
 				}
-				if (faceAttributeCount >= 3)
+				if (tempNormals.size() > 0)
 				{
 					normalIndices.push_back(normalIndex[0]);
 					normalIndices.push_back(normalIndex[1]);
@@ -166,7 +166,7 @@ namespace snes
 		// (duplicate some vertices to use with multiple faces)
 		if (tempVerts.size() > 0)
 		{
-			m_vertices.reserve(tempVerts.size());
+			m_vertices.reserve(vertIndices.size());
 
 			for (const auto& vertexIndex : vertIndices)
 			{
@@ -189,7 +189,32 @@ namespace snes
 			}
 		}
 
+		// Calculate vertex normals
+		std::vector<glm::vec3> calculatedNormals;
+		for (const auto& vertex : tempVerts)
+		{
+			calculatedNormals.push_back(glm::vec3(0));
+		}
+		// For each face
+		for (int i = 0; i < vertIndices.size(); i += 3)
+		{
+			glm::vec3 edge1 = tempVerts[vertIndices[i + 1] - 1] - tempVerts[vertIndices[i] - 1];
+			glm::vec3 edge2 = tempVerts[vertIndices[i + 2] - 1] - tempVerts[vertIndices[i] - 1];
+			glm::vec3 surfaceNormal = glm::cross(edge1, edge2);
 
+			calculatedNormals[vertIndices[i] - 1] = glm::normalize(calculatedNormals[vertIndices[i] - 1] + surfaceNormal);
+			calculatedNormals[vertIndices[i + 1] - 1] = glm::normalize(calculatedNormals[vertIndices[i + 1] - 1] + surfaceNormal);
+			calculatedNormals[vertIndices[i + 2] - 1] = glm::normalize(calculatedNormals[vertIndices[i + 2] - 1] + surfaceNormal);
+		}
+
+		m_normals.reserve(vertIndices.size());
+		for (const auto& vertexIndex : vertIndices)
+		{
+			glm::vec3 normal = calculatedNormals[vertexIndex - 1];
+			m_normals.push_back(normal);
+		}
+
+		/*
 		if (tempNormals.size() > 0)
 		{
 			m_normals.reserve(tempNormals.size());
@@ -199,7 +224,7 @@ namespace snes
 				glm::vec3 normal = tempNormals[normalIndex - 1];
 				m_normals.push_back(normal);
 			}
-		}
+		}*/
 
 		// Create vertex array and buffer objects
 		InitialiseVAO();
@@ -212,7 +237,7 @@ namespace snes
 	uint Mesh::GetFaceAttributeCount(std::string face)
 	{
 		// Count the number of '/'s in a face line, divide by 3 (to get one vertex), and add one
-		return ((uint)std::count(face.begin(), face.end(), '/') / 3) + 1;
+		return ((uint)std::count(face.begin() + 1, face.end(), '/') / 3) + 1;
 	}
 
 	void Mesh::InitialiseVAO()

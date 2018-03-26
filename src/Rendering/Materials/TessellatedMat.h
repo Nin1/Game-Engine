@@ -18,11 +18,15 @@ namespace snes
 		/** Load the texture for this mesh into OpenGL */
 		void SetTexture(const char* texturePath);
 
+		static void ToggleTessellation() { m_useTessellation = !m_useTessellation; }
+
 	private:
 		GLuint m_textureID = -1;
 		GLuint m_dispMapID = -1;
-		GLuint m_innerTessLevel = 2048;
-		GLuint m_outerTessLevel = 2048;
-		float m_displacementMagnitude = 10.0f;
+		GLuint m_innerTessLevel = 1;
+		GLuint m_outerTessLevel = 1;
+		float m_displacementMagnitude = 1.0f;
+
+		static bool m_useTessellation;
 	};
 }

@@ -1,0 +1,47 @@
+﻿#version 430 core
+
+struct PhongPatch
+{
+	float termIJ;
+	float termJK;
+	float termIK;
+};
+
+layout(vertices = 3) out;
+
+in vec3 vPosition[];
+in vec3 vNormal[];
+in vec2 vTexCoord[];
+
+out vec3 tcPosition[];
+out vec3 tcNormal[];
+out vec2 tcTexCoord[];
+out PhongPatch tcPhongPatch[];
+
+uniform float innerTessLevel;
+uniform float outerTessLevel;
+
+float PIi(int i, vec3 q) //@TODO: Change the name of this function
+{
+	vec3 qMinusP = q - vPosition[i];
+	return q[gl_InvocationID] - dot(qMinusP, vNormal[i]) * vNormal[i][gl_InvocationID];
+}
+
+void main()
+{
+	tcPosition[gl_InvocationID] = vPosition[gl_InvocationID];
+	tcNormal[gl_InvocationID] = vNormal[gl_InvocationID];
+	tcTexCoord[gl_InvocationID] = vTexCoord[gl_InvocationID];
+
+	tcPhongPatch[gl_InvocationID].termIJ = PIi(0, vPosition[1]) + PIi(1, vPosition[0]);
+	tcPhongPatch[gl_InvocationID].termJK = PIi(1, vPosition[2]) + PIi(2, vPosition[1]);
+	tcPhongPatch[gl_InvocationID].termIK = PIi(2, vPosition[0]) + PIi(0, vPosition[2]);
+
+	if(gl_InvocationID == 0)
+	{
+		gl_TessLevelInner[0] = innerTessLevel;
+		gl_TessLevelOuter[0] = outerTessLevel;
+		gl_TessLevelOuter[1] = outerTessLevel;
+		gl_TessLevelOuter[2] = outerTessLevel;
+	}
+}
