@@ -46,6 +46,9 @@ namespace snes
 		/** @return the "diameter" of the sphere that would encapsulate the object*/
 		float GetSize() { return m_size; }
 
+		/** Generate neighbour data for each face */
+		void GenNeighbourData();
+
 	public:
 		/** Returns the mesh data from the mesh at the given path */
 		static std::shared_ptr<Mesh> GetMesh(const char* modelPath);

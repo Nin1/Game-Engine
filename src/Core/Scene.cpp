@@ -8,6 +8,7 @@
 #include <Components\LODModel.h>
 #include <Components\MeshRenderer.h>
 #include <Components\Rigidbody.h>
+#include <Components\TessModel.h>
 #include <Components\TestComponent.h>
 
 #include <Rendering\Mesh.h>
@@ -217,7 +218,7 @@ namespace snes
 		link->GetTransform().SetLocalScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		link->GetTransform().SetLocalRotation(glm::vec3(0, 180, 0));
 
-		auto& lodModel = link->AddComponent<LODModel>().lock();
+		auto& lodModel = link->AddComponent<TessModel>().lock();
 		lodModel->SetCamera(camera);
 		lodModel->Load("Models/crash");
 

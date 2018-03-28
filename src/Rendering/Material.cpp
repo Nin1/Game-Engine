@@ -5,6 +5,7 @@
 #include "Materials/LitColourMat.h"
 #include "Materials/LitTexturedMat.h"
 #include "Materials/ShadowSolidMat.h"
+#include "Materials/SilhouetteTessellatedMat.h"
 #include "Materials/SolidColourMat.h"
 #include "Materials/TessellatedMat.h"
 #include "Materials/UnlitTexturedMat.h"
@@ -83,6 +84,10 @@ namespace snes
 		{
 			material = std::make_shared<TessellatedMat>(params);
 		}
+		else if (line == "SILHOUETTE_TESSELLATED_TEXTURED")
+		{
+			material = std::make_shared<SilhouetteTessellatedMat>(params);
+		}
 		else
 		{
 			material = std::make_shared<SolidColourMat>();
@@ -117,7 +122,7 @@ namespace snes
 		{
 			material = std::make_shared<ShadowSolidMat>(params);	// @TODO: Support transparent textured shadows (e.g. chain-link fences)
 		}
-		else if (line == "TESSELLATED_TEXTURED")
+		else if (line == "TESSELLATED_TEXTURED" || line == "SILHOUETTE_TESSELLATED_TEXTURED")
 		{
 			material = std::make_shared<ShadowSolidMat>(params);	// @TODO: Support tessellated shadows
 		}

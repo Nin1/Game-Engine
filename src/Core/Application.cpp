@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
-#define OPENGL_DEBUG 0
+#define OPENGL_DEBUG 1
 
 namespace snes
 {

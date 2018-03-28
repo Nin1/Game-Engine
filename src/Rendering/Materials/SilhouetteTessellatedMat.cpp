@@ -1,13 +1,13 @@
 #include "stdafx.h"
-#include "TessellatedMat.h"
+#include "SilhouetteTessellatedMat.h"
 #include "Components\Camera.h"
 #include <SOIL/SOIL.h>
 
 namespace snes
 {
-	bool TessellatedMat::m_useTessellation = true;
+	bool SilhouetteTessellatedMat::m_useTessellation = true;
 
-	TessellatedMat::TessellatedMat() : Material(TESSELLATED_TEXTURED)
+	SilhouetteTessellatedMat::SilhouetteTessellatedMat() : Material(SILHOUETTE_TESSELLATED_TEXTURED)
 	{
 		SetUniformSampler2D("tex1", 0);
 		SetUniformSampler2D("dispMap", 1);
@@ -17,7 +17,7 @@ namespace snes
 		m_usePatches = true;
 	}
 
-	TessellatedMat::TessellatedMat(std::ifstream& params) : Material(TESSELLATED_TEXTURED)
+	SilhouetteTessellatedMat::SilhouetteTessellatedMat(std::ifstream& params) : Material(SILHOUETTE_TESSELLATED_TEXTURED)
 	{
 		SetUniformSampler2D("tex1", 0);
 		SetUniformSampler2D("dispMap", 1);
@@ -73,11 +73,11 @@ namespace snes
 	}
 
 
-	TessellatedMat::~TessellatedMat()
+	SilhouetteTessellatedMat::~SilhouetteTessellatedMat()
 	{
 	}
 
-	void TessellatedMat::PrepareForRendering(Transform& transform, Camera& camera)
+	void SilhouetteTessellatedMat::PrepareForRendering(Transform& transform, Camera& camera)
 	{
 		// Toggle for turning tessellation on/off
 		if (m_useTessellation)
@@ -105,10 +105,10 @@ namespace snes
 		{
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
-		glPatchParameteri(GL_PATCH_VERTICES, 3);	// @TODO: This is 6 here for neighbouring vertices, but should be 3 for non-silhouette based shaders. Make new materials.
+		glPatchParameteri(GL_PATCH_VERTICES, 6);	// @TODO: This is 6 here for neighbouring vertices, but should be 3 for non-silhouette based shaders. Make new materials.
 	}
 
-	void TessellatedMat::SetTexture(const char* texturePath)
+	void SilhouetteTessellatedMat::SetTexture(const char* texturePath)
 	{
 		m_textureID = SOIL_load_OGL_texture(
 			texturePath,

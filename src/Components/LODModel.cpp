@@ -156,7 +156,7 @@ namespace snes
 		}
 
 		PrepareTransformUniforms(camera, material);
-		material->PrepareForRendering(m_transform);
+		material->PrepareForRendering(m_transform, camera);
 		m_meshes[m_lastRenderedMesh]->PrepareForRendering();
 
 		if (m_transitionRemainingS > 0.0f)
@@ -189,7 +189,7 @@ namespace snes
 		}
 
 		PrepareTransformUniforms(camera, material);
-		material->PrepareForRendering(m_transform);
+		material->PrepareForRendering(m_transform, camera);
 		m_meshes[m_transitioningFromMesh]->PrepareForRendering();
 
 		if (m_transitionRemainingS > 0.0f)

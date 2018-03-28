@@ -6,12 +6,12 @@ namespace snes
 {
 	/** Tessellated Material
 	  * Renders a textured mesh with tessellation. */
-	class TessellatedMat : public Material
+	class SilhouetteTessellatedMat : public Material
 	{
 	public:
-		TessellatedMat();
-		TessellatedMat(std::ifstream& params);
-		~TessellatedMat();
+		SilhouetteTessellatedMat();
+		SilhouetteTessellatedMat(std::ifstream& params);
+		~SilhouetteTessellatedMat();
 		
 		void PrepareForRendering(Transform& transform, Camera& camera) override;
 

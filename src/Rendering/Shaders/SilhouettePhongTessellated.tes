@@ -1,0 +1,91 @@
+#version 430 core
+
+struct PhongPatch
+{
+	float termIJ;
+	float termJK;
+	float termIK;
+};
+
+layout(triangles, fractional_odd_spacing, ccw) in;
+
+in vec3 tcPosition[];
+in vec2 tcTexCoord[];
+in vec3 tcNormal[];
+in PhongPatch tcPhongPatch[];
+
+out vec3 teFragPos;	// vertex position in world space
+out vec3 tePosition; // vertex position in model space
+out vec2 teTexCoord;
+out vec3 teNormal;
+
+uniform mat4 modelMat;
+uniform mat4 viewMat;
+uniform mat4 projMat;
+uniform mat4 projViewMat;
+uniform mat4 normalMat;
+
+uniform bool hasDispMap;
+uniform sampler2D dispMap;
+uniform float magnitude;
+
+void main()
+{
+	// Squared tesscoords
+	vec3 tcSq = gl_TessCoord * gl_TessCoord;
+
+	vec3 p0 = gl_TessCoord.x * tcPosition[0];
+	vec3 p1 = gl_TessCoord.y * tcPosition[1];
+	vec3 p2 = gl_TessCoord.z * tcPosition[2];
+	vec3 pos = p0 + p1 + p2;
+	
+	vec3 n0 = gl_TessCoord.x * tcNormal[0];
+	vec3 n1 = gl_TessCoord.y * tcNormal[1];
+	vec3 n2 = gl_TessCoord.z * tcNormal[2];
+	vec3 normal = n0 + n1 + n2;
+	
+	vec2 tc0 = gl_TessCoord.x * tcTexCoord[0];
+	vec2 tc1 = gl_TessCoord.y * tcTexCoord[1];
+	vec2 tc2 = gl_TessCoord.z * tcTexCoord[2];
+	teTexCoord = tc0 + tc1 + tc2;
+
+	// build terms
+	vec3 termIJ = vec3(tcPhongPatch[0].termIJ,
+	                   tcPhongPatch[1].termIJ,
+	                   tcPhongPatch[2].termIJ);
+
+	vec3 termJK = vec3(tcPhongPatch[0].termJK,
+	                   tcPhongPatch[1].termJK,
+	                   tcPhongPatch[2].termJK);
+
+	vec3 termIK = vec3(tcPhongPatch[0].termIK,
+	                   tcPhongPatch[1].termIK,
+	                   tcPhongPatch[2].termIK);
+
+	// phong tessellated position
+	vec3 phongPos	= tcSq[0] * tcPosition[0]
+					+ tcSq[1] * tcPosition[1]
+					+ tcSq[2] * tcPosition[2]
+					+ gl_TessCoord[0] * gl_TessCoord[1] * termIJ
+					+ gl_TessCoord[1] * gl_TessCoord[2] * termJK
+					+ gl_TessCoord[2] * gl_TessCoord[0] * termIK;
+
+	pos = (0.6 * phongPos) + (0.4 * pos);	// @TODO: vec3 finalPos = (1.0-uTessAlpha)*barPos + uTessAlpha*phongPos; 
+
+	float height;
+	if(hasDispMap)
+	{
+		height = texture(dispMap, teTexCoord).x;
+	}
+	else
+	{
+		height = 0.0f;
+	}
+	pos += normal * height * magnitude;
+
+	teFragPos = pos;
+	gl_Position = projViewMat * vec4(teFragPos, 1);
+
+	tePosition = (viewMat * vec4(teFragPos, 1)).xyz;
+	teNormal = (transpose(inverse(viewMat)) * vec4(normal, 0)).xyz;
+}

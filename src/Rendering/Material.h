@@ -5,6 +5,7 @@
 
 namespace snes
 {
+	class Camera;
 	class Transform;
 
 	// Derive from this to make your material
@@ -15,7 +16,7 @@ namespace snes
 
 		/** Called before rendering, set uniforms in here */
 		virtual void PrepareForRendering();
-		virtual void PrepareForRendering(Transform& transform) { this->PrepareForRendering(); }
+		virtual void PrepareForRendering(Transform& transform, Camera& camera) { this->PrepareForRendering(); }
 
 		/** Set the model, view, and projection uniforms (these must be present in every material shader) */
 		virtual void ApplyTransformUniforms(glm::mat4& model, glm::mat4& view, glm::mat4& proj);

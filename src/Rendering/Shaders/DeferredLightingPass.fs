@@ -28,7 +28,7 @@ struct PointLight
 const int MAX_POINT_LIGHTS = 32; // See DeferredLightingManager.h
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 
-const float AMBIENT = 0.1;
+const float AMBIENT = 0.3;
 
 const vec2 POISSONDISK[4] = vec2[](
   vec2( -0.94201624, -0.39906216 ),

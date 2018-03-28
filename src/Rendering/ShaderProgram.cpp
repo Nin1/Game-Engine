@@ -98,6 +98,8 @@ namespace snes
 			return "src/rendering/shaders/Billboard";
 		case TESSELLATED_TEXTURED:
 			return "src/rendering/shaders/PhongTessellated";
+		case SILHOUETTE_TESSELLATED_TEXTURED:
+			return "src/rendering/shaders/SilhouettePhongTessellated";
 		case SHADOW_SOLID:
 			return "src/rendering/shaders/ShadowPassSolid";
 		case SHADOW_TEXTURED:

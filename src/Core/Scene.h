@@ -19,7 +19,7 @@ namespace snes
 		void FixedLogic();
 		void MainLogic() { m_root->MainLogic(); }
 		void MainDraw();
-
+		
 	private:
 		GameObject& CreateJiggy(glm::vec3 pos, std::shared_ptr<Camera> camera, std::shared_ptr<Material> material);
 		std::weak_ptr<GameObject> CreateLink(glm::vec3 pos, std::shared_ptr<Camera> camera);

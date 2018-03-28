@@ -4,8 +4,6 @@
 
 namespace snes
 {
-	class Transform;
-
 	/** Billboard Material
 	  * A material always faces the camera */
 	class BillboardMat : public Material
@@ -15,7 +13,7 @@ namespace snes
 		BillboardMat(std::ifstream& params);
 		~BillboardMat();
 
-		void PrepareForRendering(Transform& transform) override;
+		void PrepareForRendering(Transform& transform, Camera& camera) override;
 
 	private:
 		GLuint m_textureID = 0;

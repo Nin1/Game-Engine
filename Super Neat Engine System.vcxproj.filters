@@ -141,6 +141,12 @@
     <ClInclude Include="src\Components\ControllableCamera.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
+    <ClInclude Include="src\Components\TessModel.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Rendering\Materials\SilhouetteTessellatedMat.h">
+      <Filter>Header Files\Rendering\Materials</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
@@ -244,6 +250,12 @@
     </ClCompile>
     <ClCompile Include="src\Components\ControllableCamera.cpp">
       <Filter>Source Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Components\TessModel.cpp">
+      <Filter>Source Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Rendering\Materials\SilhouetteTessellatedMat.cpp">
+      <Filter>Source Files\Rendering\Materials</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -30,6 +30,7 @@
     <ClInclude Include="src\Components\PointLight.h" />
     <ClInclude Include="src\Components\Rigidbody.h" />
     <ClInclude Include="src\Components\SphereCollider.h" />
+    <ClInclude Include="src\Components\TessModel.h" />
     <ClInclude Include="src\Components\TestComponent.h" />
     <ClInclude Include="src\Components\Transform.h" />
     <ClInclude Include="src\Core\Application.h" />
@@ -46,6 +47,7 @@
     <ClInclude Include="src\Rendering\Materials\LitColourMat.h" />
     <ClInclude Include="src\Rendering\Materials\LitTexturedMat.h" />
     <ClInclude Include="src\Rendering\Materials\ShadowSolidMat.h" />
+    <ClInclude Include="src\Rendering\Materials\SilhouetteTessellatedMat.h" />
     <ClInclude Include="src\Rendering\Materials\SolidColourMat.h" />
     <ClInclude Include="src\Rendering\Materials\TessellatedMat.h" />
     <ClInclude Include="src\Rendering\Materials\UnlitTexturedMat.h" />
@@ -65,6 +67,7 @@
     <ClCompile Include="src\Components\PointLight.cpp" />
     <ClCompile Include="src\Components\Rigidbody.cpp" />
     <ClCompile Include="src\Components\SphereCollider.cpp" />
+    <ClCompile Include="src\Components\TessModel.cpp" />
     <ClCompile Include="src\Components\TestComponent.cpp" />
     <ClCompile Include="src\Components\Transform.cpp" />
     <ClCompile Include="src\Core\Application.cpp" />
@@ -82,6 +85,7 @@
     <ClCompile Include="src\Rendering\Materials\LitColourMat.cpp" />
     <ClCompile Include="src\Rendering\Materials\LitTexturedMat.cpp" />
     <ClCompile Include="src\Rendering\Materials\ShadowSolidMat.cpp" />
+    <ClCompile Include="src\Rendering\Materials\SilhouetteTessellatedMat.cpp" />
     <ClCompile Include="src\Rendering\Materials\SolidColourMat.cpp" />
     <ClCompile Include="src\Rendering\Materials\TessellatedMat.cpp" />
     <ClCompile Include="src\Rendering\Materials\UnlitTexturedMat.cpp" />
