@@ -23,6 +23,8 @@ namespace snes
 		void FixedLogic() override;
 		void MainLogic() override;
 		void MainDraw(RenderPass renderPass, Camera& camera) override;
+
+		const std::weak_ptr<Mesh> GetMesh() const { return m_mesh; }
 				
 	private:
 		/** Calculate the model/view/proj matrices and apply them to the material */

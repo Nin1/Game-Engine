@@ -11,7 +11,7 @@ uniform sampler2D gEmissive;
 uniform sampler2D gShadowMap;
 
 uniform vec3 viewPos;
-uniform vec3 cameraViewMat;
+uniform mat4 cameraViewMat;
 uniform mat4 shadowVPMat;
 uniform vec3 eyeSpaceLightPos;
 uniform vec3 directionalLightColour;
@@ -72,7 +72,7 @@ void main()
     //** DIRECTIONAL LIGHTING */
     
 	vec3 lighting;
-	vec3 eyeSpaceFragPos = cameraViewMat * fragPos;
+	vec3 eyeSpaceFragPos = (cameraViewMat * vec4(fragPos, 1)).xyz;
 	vec3 viewDir = normalize(viewPos - fragPos);
 	{
 		//vec3 lightDir = normalize(eyeSpaceLightPos - eyeSpaceFragPos);

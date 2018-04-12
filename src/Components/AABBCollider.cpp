@@ -3,6 +3,7 @@
 #include "MeshRenderer.h"
 #include "SphereCollider.h"
 #include "LODModel.h"
+#include "TessModel.h"
 #include <Core\GameObject.h>
 #include <glm/gtx/euler_angles.hpp>
 
@@ -24,6 +25,11 @@ namespace snes
 			if (lodMesh)
 			{
 				mesh = lodMesh->GetMesh(0);
+			}
+			const auto tessMesh = m_gameObject.GetComponent<TessModel>();
+			if (tessMesh)
+			{
+				mesh = tessMesh->GetMesh();
 			}
 		}
 

@@ -14,7 +14,7 @@
 // 		 '  2  '
 //
 // Now for each edge, its 'silhouetteness' can be found
-// 
+// If an edge is on the silhouette, apply full phong displacement to that edge
 
 
 
@@ -36,6 +36,10 @@ out vec3 tcNormal[];
 out vec2 tcTexCoord[];
 out PhongPatch tcPhongPatch[];
 
+patch out int silhouetteUV;
+patch out int silhouetteVW;
+patch out int silhouetteWU;
+
 uniform float innerTessLevel;
 uniform float outerTessLevel;
 
@@ -48,38 +52,93 @@ float PIi(int i, vec3 q) //@TODO: Change the name of this function
 	return q[gl_InvocationID] - dot(qMinusP, vNormal[i]) * vNormal[i][gl_InvocationID];
 }
 
+// The 'silhouetteness' of an edge of a triangle is calculated as the product between two terms
+// The first is the product of the vector that goes from the camera to the midpoint of the edge and the normal
+// And the second is the same product but with the normal of the adjacent triangle.
+// beta is a constant, dependent on local geometry, that lets us define a 'transitional' region close to an edge
+int calculateSilhouetteness(int edge, vec3 mainNormal, vec3 adjNormal, float beta)
+{
+	vec3 edgeVector = vPosition[edge] + vPosition[(edge + 1) % 3];
+	vec3 edgeMidPoint = edgeVector / 2.0;
+
+	vec3 pointToViewDir = normalize(viewPos - edgeMidPoint);
+
+	if(length(mainNormal) < 0.001) return 1; // 1.0;	// Invalid normal?
+
+	float firstTerm = dot(pointToViewDir, mainNormal);
+	float secondTerm = dot(pointToViewDir, adjNormal);
+
+	if(firstTerm < 0.0 && secondTerm < 0.0) return 0; // 0.0; // Both triangles face away from camera, not an edge
+
+	float product = firstTerm * secondTerm;
+
+	if(product <= 0.0) return 1; // 1.0;
+	if(product <= beta) return 0; // (1.0 - product) / beta;
+	return 0; //0.0;
+}
+
 void main()
 {
 	if(gl_InvocationID == 0)
 	{
 		float finalInnerTessLevel = innerTessLevel;
 		float finalOuterTessLevel = innerTessLevel;
-
+		
 		if(innerTessLevel > 1 || outerTessLevel > 1)
 		{
-			/** Determine tessellation level from face normal for silhouette-only tessellation */
-			// Find surface normal
+//			/** Determine tessellation level from face normal for silhouette-only tessellation */
+//			// Find surface normal
+//			vec3 edge1 = vPosition[1] - vPosition[0];
+//			vec3 edge2 = vPosition[2] - vPosition[0];
+//			vec3 worldSpaceNormal = normalize(cross(edge1, edge2));
+//
+//			// Find direction vector from camera to surface center
+//			vec3 surfaceCenter = (vPosition[0] + vPosition[1] + vPosition[2]) / 3;
+//			vec3 viewDir = normalize(viewPos - surfaceCenter);
+//
+//			// Find angle between surface normal and (camera - surface-center) vector
+//			float cosine = dot(worldSpaceNormal, viewDir);
+//
+//			// Adjust tessellation level based on tessellation level
+//			//finalInnerTessLevel = min(innerTessLevel, max(1, innerTessLevel * (1 - cosine)));
+//			//finalOuterTessLevel = min(outerTessLevel, max(1, outerTessLevel * (1 - cosine)));
+//
+//			if(cosine > 0.3)
+//			{
+//				finalInnerTessLevel = 1;
+//				finalOuterTessLevel = 1;
+//			}
+
+			// Calculate silhouetteness of each edge
+			// Use highest silhouetteness to calculate tess level
+
+			// Calculate normal of each triangle
 			vec3 edge1 = vPosition[1] - vPosition[0];
 			vec3 edge2 = vPosition[2] - vPosition[0];
-			vec3 worldSpaceNormal = normalize(cross(edge1, edge2));
+			vec3 mainNormal = normalize(cross(edge1, edge2));
 
-			// Find direction vector from camera to surface center
-			vec3 surfaceCenter = (vPosition[0] + vPosition[1] + vPosition[2]) / 3;
-			vec3 viewDir = normalize(viewPos - surfaceCenter);
+			edge1 = vPosition[3] - vPosition[0];
+			edge2 = vPosition[1] - vPosition[0];
+			vec3 adjNormal1 = normalize(cross(edge1, edge2));
 
-			// Find angle between surface normal and (camera - surface-center) vector
-			float cosine = dot(worldSpaceNormal, viewDir);
+			edge1 = vPosition[4] - vPosition[1];
+			edge2 = vPosition[2] - vPosition[1];
+			vec3 adjNormal2 = normalize(cross(edge1, edge2));
 
-			// Adjust tessellation level based on tessellation level
-			//finalInnerTessLevel = min(innerTessLevel, max(1, innerTessLevel * (1 - cosine)));
-			//finalOuterTessLevel = min(outerTessLevel, max(1, outerTessLevel * (1 - cosine)));
+			edge1 = vPosition[0] - vPosition[5];
+			edge2 = vPosition[2] - vPosition[5];
+			vec3 adjNormal3 = normalize(cross(edge1, edge2));
 
-			if(cosine > 0.3)
-			{
-				finalInnerTessLevel = 1;
-				finalOuterTessLevel = 1;
-			}
+			float beta = 0.2;
+		
+			silhouetteUV = calculateSilhouetteness(0, mainNormal, adjNormal1, beta);
+			silhouetteVW = calculateSilhouetteness(1, mainNormal, adjNormal2, beta);
+			silhouetteWU = calculateSilhouetteness(2, mainNormal, adjNormal3, beta);
 
+			bool isSilhouette = silhouetteUV == 1 || silhouetteVW == 1 || silhouetteWU == 1;
+			
+			finalInnerTessLevel = isSilhouette ? innerTessLevel : 1;
+			finalOuterTessLevel = isSilhouette ? outerTessLevel : 1;
 		}
 
 		gl_TessLevelInner[0] = finalInnerTessLevel;
@@ -95,5 +154,4 @@ void main()
 	tcPhongPatch[gl_InvocationID].termIJ = PIi(0, vPosition[1]) + PIi(1, vPosition[0]);
 	tcPhongPatch[gl_InvocationID].termJK = PIi(1, vPosition[2]) + PIi(2, vPosition[1]);
 	tcPhongPatch[gl_InvocationID].termIK = PIi(2, vPosition[0]) + PIi(0, vPosition[2]);
-
 }

@@ -18,6 +18,7 @@
 #include <Rendering\Materials\SolidColourMat.h>
 #include <Rendering\Materials\UnlitTexturedMat.h>
 #include <Rendering\Materials\TessellatedMat.h>
+#include <Rendering\Materials\SilhouetteTessellatedMat.h>
 
 namespace snes
 {
@@ -82,6 +83,7 @@ namespace snes
 		if (Input::GetKeyDown('t'))
 		{
 			TessellatedMat::ToggleTessellation();
+			SilhouetteTessellatedMat::ToggleTessellation();
 		}
 
 		LODModel::StartNewFrame();
@@ -220,7 +222,7 @@ namespace snes
 
 		auto& lodModel = link->AddComponent<TessModel>().lock();
 		lodModel->SetCamera(camera);
-		lodModel->Load("Models/crash");
+		lodModel->Load("Models/charizard");
 
 		// Add Rigidbody and collider
 		link->AddComponent<Rigidbody>();
@@ -228,6 +230,7 @@ namespace snes
 
 		// Add character controller component
 		link->AddComponent<CharController>();
+		link->AddComponent<TestComponent>();
 
 		CreatePointLight(*link, glm::vec3(0.0f), glm::vec3(1.0f));
 

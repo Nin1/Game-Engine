@@ -91,8 +91,6 @@ namespace snes
 			SetUniformFloat("outerTessLevel", 1);
 		}
 
-		SetUniformVec3("viewPos", camera.GetTransform().GetWorldPosition());
-
 		Material::PrepareForRendering();
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_textureID);

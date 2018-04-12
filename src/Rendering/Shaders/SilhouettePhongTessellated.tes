@@ -19,6 +19,10 @@ out vec3 tePosition; // vertex position in model space
 out vec2 teTexCoord;
 out vec3 teNormal;
 
+patch in int silhouetteUV;
+patch in int silhouetteVW;
+patch in int silhouetteWU;
+
 uniform mat4 modelMat;
 uniform mat4 viewMat;
 uniform mat4 projMat;
@@ -70,7 +74,71 @@ void main()
 					+ gl_TessCoord[1] * gl_TessCoord[2] * termJK
 					+ gl_TessCoord[2] * gl_TessCoord[0] * termIK;
 
-	pos = (0.6 * phongPos) + (0.4 * pos);	// @TODO: vec3 finalPos = (1.0-uTessAlpha)*barPos + uTessAlpha*phongPos; 
+	// EXPERIMENT AREA WOO //
+
+	float u = gl_TessCoord.x;
+	float v = gl_TessCoord.y;
+	float w = gl_TessCoord.z;
+	
+	// METHOD 1
+
+	float phongAmount = 0.0;
+
+	if(silhouetteUV == 1)
+	{
+		float phongAmountUV = u + v - w;
+		if(u == 0 || v == 0)
+		{
+			phongAmountUV = 0;
+		}
+		phongAmount = max(phongAmount, phongAmountUV);
+	}
+	if(silhouetteVW == 1)
+	{
+		float phongAmountVW = v + w - u;
+		if(v == 0 || w == 0)
+		{
+			phongAmountVW = 0;
+		}
+		phongAmount = max(phongAmount, phongAmountVW);
+	}
+	if(silhouetteWU == 1)
+	{
+		float phongAmountWU = w + u - v;
+		if(w == 0 || u == 0)
+		{
+			phongAmountWU = 0;
+		}
+		phongAmount = max(phongAmount, phongAmountWU);
+	}
+
+	phongAmount *= 0.6;
+
+	//////////////
+
+	// METHOD 2
+
+	phongAmount = 1.0;
+	float distanceFromEdge = 0.1;
+
+	if(silhouetteUV == 0 && w <= distanceFromEdge)
+	{
+		phongAmount *= w * (1 / distanceFromEdge);
+	}
+	if(silhouetteVW == 0 && u <= distanceFromEdge)
+	{
+		phongAmount *= u * (1 / distanceFromEdge);
+	}
+	if(silhouetteWU == 0 && v <= distanceFromEdge)
+	{
+		phongAmount *= v * (1 / distanceFromEdge);
+	}
+
+	phongAmount *= 0.4;
+
+	// EXPERIMENT AREA END //
+
+	pos = (phongAmount * phongPos) + ((1 - phongAmount) * pos);	// @TODO: vec3 finalPos = (1.0-uTessAlpha)*barPos + uTessAlpha*phongPos; 
 
 	float height;
 	if(hasDispMap)
@@ -81,7 +149,7 @@ void main()
 	{
 		height = 0.0f;
 	}
-	pos += normal * height * magnitude;
+	//pos += normal * height * magnitude;
 
 	teFragPos = pos;
 	gl_Position = projViewMat * vec4(teFragPos, 1);

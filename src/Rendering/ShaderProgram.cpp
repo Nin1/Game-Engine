@@ -63,9 +63,14 @@ namespace snes
 	{
 		// If it's part of an array, find it manually
 		std::string nameStr = name;
+		GLuint pos = -1;
 		if (nameStr.find('[') != std::string::npos)
 		{
-			return glGetUniformLocation(m_programID, name);
+			pos = glGetUniformLocation(m_programID, name);
+			if (pos != -1)
+			{
+				return pos;
+			}
 		}
 		else
 		{
@@ -78,8 +83,9 @@ namespace snes
 				}
 			}
 		}
-		std::cout << "Error: No uniform found with name " << name << std::endl;
-		return 0;
+
+		std::cout << "Error: No uniform found with name " << name << ". It may have been optimised out." << std::endl;		
+		return pos;
 	}
 	
 	std::string ShaderProgram::GetShaderFilePaths(ShaderName shaderName)
