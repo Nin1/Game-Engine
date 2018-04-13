@@ -70,7 +70,7 @@ void main()
 					+ gl_TessCoord[1] * gl_TessCoord[2] * termJK
 					+ gl_TessCoord[2] * gl_TessCoord[0] * termIK;
 
-	pos = (0.6 * phongPos) + (0.4 * pos);	// @TODO: vec3 finalPos = (1.0-uTessAlpha)*barPos + uTessAlpha*phongPos; 
+	pos = (0.4 * phongPos) + (0.6 * pos);	// @TODO: vec3 finalPos = (1.0-uTessAlpha)*barPos + uTessAlpha*phongPos; 
 
 	float height;
 	if(hasDispMap)

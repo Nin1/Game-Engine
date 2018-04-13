@@ -41,7 +41,10 @@ namespace snes
 
 		for (auto& component : m_components)
 		{
-			component->FixedLogic();
+			if (component->IsEnabled())
+			{
+				component->FixedLogic();
+			}
 		}
 	}
 
@@ -54,7 +57,10 @@ namespace snes
 
 		for (auto& component : m_components)
 		{
-			component->MainLogic();
+			if (component->IsEnabled())
+			{
+				component->MainLogic();
+			}
 		}
 	}
 
@@ -67,7 +73,10 @@ namespace snes
 
 		for (auto& component : m_components)
 		{
-			component->MainDraw(renderPass, camera);
+			if (component->IsEnabled())
+			{
+				component->MainDraw(renderPass, camera);
+			}
 		}
 	}
 
@@ -80,7 +89,10 @@ namespace snes
 
 		for (auto& component : m_components)
 		{
-			component->OnCollision(other);
+			if (component->IsEnabled())
+			{
+				component->OnCollision(other);
+			}
 		}
 	}
 }

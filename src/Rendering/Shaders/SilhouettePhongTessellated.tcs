@@ -36,9 +36,9 @@ out vec3 tcNormal[];
 out vec2 tcTexCoord[];
 out PhongPatch tcPhongPatch[];
 
-patch out int silhouetteUV;
-patch out int silhouetteVW;
-patch out int silhouetteWU;
+patch out float silhouetteUV;
+patch out float silhouetteVW;
+patch out float silhouetteWU;
 
 uniform float innerTessLevel;
 uniform float outerTessLevel;
@@ -56,24 +56,24 @@ float PIi(int i, vec3 q) //@TODO: Change the name of this function
 // The first is the product of the vector that goes from the camera to the midpoint of the edge and the normal
 // And the second is the same product but with the normal of the adjacent triangle.
 // beta is a constant, dependent on local geometry, that lets us define a 'transitional' region close to an edge
-int calculateSilhouetteness(int edge, vec3 mainNormal, vec3 adjNormal, float beta)
+float calculateSilhouetteness(int edge, vec3 mainNormal, vec3 adjNormal, float beta)
 {
 	vec3 edgeVector = vPosition[edge] + vPosition[(edge + 1) % 3];
 	vec3 edgeMidPoint = edgeVector / 2.0;
 
 	vec3 pointToViewDir = normalize(viewPos - edgeMidPoint);
 
-	if(length(mainNormal) < 0.001) return 1; // 1.0;	// Invalid normal?
+	//if(length(mainNormal) < 0.001) return 1.0;	// Invalid normal?
 
 	float firstTerm = dot(pointToViewDir, mainNormal);
 	float secondTerm = dot(pointToViewDir, adjNormal);
 
-	if(firstTerm < 0.0 && secondTerm < 0.0) return 0; // 0.0; // Both triangles face away from camera, not an edge
+	//if(firstTerm < 0.0 && secondTerm < 0.0) return 0.0; // Both triangles face away from camera, not an edge
 
 	float product = firstTerm * secondTerm;
 
-	if(product <= 0.0) return 1; // 1.0;
-	if(product <= beta) return 0; // (1.0 - product) / beta;
+	if(product <= 0.0) return 1.0;
+	if(product <= beta) return 1.0 - product / beta;
 	return 0; //0.0;
 }
 
@@ -135,10 +135,21 @@ void main()
 			silhouetteVW = calculateSilhouetteness(1, mainNormal, adjNormal2, beta);
 			silhouetteWU = calculateSilhouetteness(2, mainNormal, adjNormal3, beta);
 
-			bool isSilhouette = silhouetteUV == 1 || silhouetteVW == 1 || silhouetteWU == 1;
+			bool isSilhouette =	silhouetteUV > 0.0 ||
+								silhouetteVW > 0.0 ||
+								silhouetteWU > 0.0 ||
+								vPosition[0] == vPosition[3] || // If there is no neighbouring triangle, the first vertex of the edge is used as a placeholder.
+								vPosition[1] == vPosition[4] || // Treat these triangles as silhouettes
+								vPosition[2] == vPosition[5];	
 			
 			finalInnerTessLevel = isSilhouette ? innerTessLevel : 1;
 			finalOuterTessLevel = isSilhouette ? outerTessLevel : 1;
+		}
+		else
+		{
+			silhouetteUV = 0.0;
+			silhouetteVW = 0.0;
+			silhouetteWU = 0.0;
 		}
 
 		gl_TessLevelInner[0] = finalInnerTessLevel;

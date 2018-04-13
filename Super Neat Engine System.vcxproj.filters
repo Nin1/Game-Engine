@@ -147,6 +147,9 @@
     <ClInclude Include="src\Rendering\Materials\SilhouetteTessellatedMat.h">
       <Filter>Header Files\Rendering\Materials</Filter>
     </ClInclude>
+    <ClInclude Include="src\Components\ToggleModel.h">
+      <Filter>Header Files\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\stdafx.cpp">
@@ -256,6 +259,9 @@
     </ClCompile>
     <ClCompile Include="src\Rendering\Materials\SilhouetteTessellatedMat.cpp">
       <Filter>Source Files\Rendering\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Components\ToggleModel.cpp">
+      <Filter>Source Files\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

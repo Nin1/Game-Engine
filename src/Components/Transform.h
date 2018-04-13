@@ -37,6 +37,8 @@ namespace snes
 		/** @return the transform-rotate-scale matrix of the transform */
 		glm::mat4 GetTRS();
 
+		GameObject& GetGameObject() { return m_gameObject; }
+
 	private:
 		glm::vec3 m_localPosition;
 		glm::vec3 m_localRotation;

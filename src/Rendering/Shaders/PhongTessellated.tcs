@@ -37,7 +37,7 @@ void main()
 	tcPhongPatch[gl_InvocationID].termJK = PIi(1, vPosition[2]) + PIi(2, vPosition[1]);
 	tcPhongPatch[gl_InvocationID].termIK = PIi(2, vPosition[0]) + PIi(0, vPosition[2]);
 
-	if(gl_InvocationID == 0)
+	//if(gl_InvocationID == 0)
 	{
 		gl_TessLevelInner[0] = innerTessLevel;
 		gl_TessLevelOuter[0] = outerTessLevel;

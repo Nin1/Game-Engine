@@ -18,20 +18,35 @@ namespace snes
 		Load(modelPath);
 	}
 
-	std::shared_ptr<Mesh> Mesh::GetMesh(const char* modelPath)
+	std::shared_ptr<Mesh> Mesh::GetMesh(const char* modelPath, bool withNeighbourData)
 	{
-		if (!m_loadedMeshes[modelPath])
-		{
-			m_loadedMeshes[modelPath] = std::make_shared<Mesh>(Mesh(modelPath));
+		// NOTE: If trying to get a mesh that has already been loaded, but has had neighbour data generated,
+		//		 the mesh won't work when neighbour data isn't desired.
 
-			if (m_loadedMeshes[modelPath]->GetVertices().size() == 0)
+		std::string modelID = modelPath;
+
+		if (withNeighbourData)
+		{
+			modelID.append("n");
+		}
+
+		if (!m_loadedMeshes[modelID])
+		{
+			m_loadedMeshes[modelID] = std::make_shared<Mesh>(Mesh(modelPath));
+
+			if (m_loadedMeshes[modelID]->GetVertices().size() == 0)
 			{
 				std::cout << "Error loading mesh: " << modelPath << std::endl;
 				return nullptr;
 			}
+
+			if (withNeighbourData)
+			{
+				m_loadedMeshes[modelID]->GenNeighbourData();
+			}
 		}
 
-		return m_loadedMeshes[modelPath];
+		return m_loadedMeshes[modelID];
 	}
 
 	bool Mesh::Load(const char* modelPath)

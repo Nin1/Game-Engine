@@ -32,7 +32,12 @@ namespace snes
 		{
 			std::shared_ptr<T> component = std::make_shared<T>(*this);
 			m_components.emplace_back(component);
-			component->Awake();
+
+			if (component->IsEnabled())
+			{
+				component->Awake();
+			}
+
 			return component;
 		}
 

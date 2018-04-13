@@ -13,7 +13,7 @@ namespace snes
 		BillboardMat(std::ifstream& params);
 		~BillboardMat();
 
-		void PrepareForRendering(Transform& transform, Camera& camera) override;
+		void PrepareForRendering(Transform& transform, Camera& camera, Mesh& mesh) override;
 
 	private:
 		GLuint m_textureID = 0;

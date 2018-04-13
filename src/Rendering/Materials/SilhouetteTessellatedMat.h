@@ -13,7 +13,7 @@ namespace snes
 		SilhouetteTessellatedMat(std::ifstream& params);
 		~SilhouetteTessellatedMat();
 		
-		void PrepareForRendering(Transform& transform, Camera& camera) override;
+		void PrepareForRendering(Transform& transform, Camera& camera, Mesh& mesh) override;
 
 		/** Load the texture for this mesh into OpenGL */
 		void SetTexture(const char* texturePath);
@@ -21,11 +21,15 @@ namespace snes
 		static void ToggleTessellation() { m_useTessellation = !m_useTessellation; }
 
 	private:
+		float GetScreenSizeOfMesh(Transform& transform, Camera& camera, Mesh& mesh);
+
+
 		GLuint m_textureID = -1;
 		GLuint m_dispMapID = -1;
-		GLuint m_innerTessLevel = 1;
-		GLuint m_outerTessLevel = 1;
+		float m_maxInnerTessLevel = 1;
+		float m_maxOuterTessLevel = 1;
 		float m_displacementMagnitude = 1.0f;
+		float m_pixelsPerPolygon = 20.0f;
 
 		static bool m_useTessellation;
 	};

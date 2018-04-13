@@ -43,8 +43,8 @@ namespace snes
         }
 
         // Get window size from args
-        int windowWidth = 800;
-        int windowHeight = 600;
+        int windowWidth = 1280;
+        int windowHeight = 1024;
 		m_screen.SetResolution(windowWidth, windowHeight);
         if (argc > 1)
         {
@@ -54,7 +54,7 @@ namespace snes
 
         // Initialise glut and display window
         glutInit(&argc, argv);
-        glutInitWindowSize(800, 600);
+        glutInitWindowSize(windowWidth, windowHeight);
 		glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);	// GLUT_DOUBLE does V-Sync
         glutCreateWindow("James Engine");
         glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);

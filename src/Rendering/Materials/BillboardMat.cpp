@@ -51,7 +51,7 @@ namespace snes
 	{
 	}
 
-	void BillboardMat::PrepareForRendering(Transform& transform, Camera& camera)
+	void BillboardMat::PrepareForRendering(Transform& transform, Camera& camera, Mesh& mesh)
 	{
 		SetUniformVec3("centerWorldPos", transform.GetWorldPosition());
 		SetUniformVec3("worldScale", transform.GetWorldScale() * m_worldSize);

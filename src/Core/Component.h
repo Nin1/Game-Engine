@@ -45,8 +45,14 @@ namespace snes
 		/** @return this component's GameObject's transform */
 		Transform& GetTransform() { return m_transform; }
 
+		void Enable() { m_enabled = true; }
+		void Disable() { m_enabled = false; }
+		bool IsEnabled() { return m_enabled; }
+
 	protected:
 		GameObject& m_gameObject;
 		Transform& m_transform;
+
+		bool m_enabled = true;
 	};
 }

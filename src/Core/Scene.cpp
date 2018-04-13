@@ -10,6 +10,7 @@
 #include <Components\Rigidbody.h>
 #include <Components\TessModel.h>
 #include <Components\TestComponent.h>
+#include <Components\ToggleModel.h>
 
 #include <Rendering\Mesh.h>
 #include <Rendering\Materials\DiscoMat.h>
@@ -80,12 +81,6 @@ namespace snes
 
 	void Scene::FixedLogic()
 	{
-		if (Input::GetKeyDown('t'))
-		{
-			TessellatedMat::ToggleTessellation();
-			SilhouetteTessellatedMat::ToggleTessellation();
-		}
-
 		LODModel::StartNewFrame();
 
 		m_root->FixedLogic();
@@ -220,9 +215,16 @@ namespace snes
 		link->GetTransform().SetLocalScale(glm::vec3(1.0f, 1.0f, 1.0f));
 		link->GetTransform().SetLocalRotation(glm::vec3(0, 180, 0));
 
-		auto& lodModel = link->AddComponent<TessModel>().lock();
+		auto& lodModel = link->AddComponent<LODModel>().lock();
 		lodModel->SetCamera(camera);
-		lodModel->Load("Models/charizard");
+		lodModel->Load("Models/testobj");
+
+		auto& tessModel = link->AddComponent<TessModel>().lock();
+		tessModel->SetCamera(camera);
+		tessModel->Load("Models/testobj");
+
+		auto& toggleModel = link->AddComponent<ToggleModel>().lock();
+		toggleModel->SetModels(lodModel, tessModel);
 
 		// Add Rigidbody and collider
 		link->AddComponent<Rigidbody>();
@@ -230,7 +232,7 @@ namespace snes
 
 		// Add character controller component
 		link->AddComponent<CharController>();
-		link->AddComponent<TestComponent>();
+		//link->AddComponent<TestComponent>();
 
 		CreatePointLight(*link, glm::vec3(0.0f), glm::vec3(1.0f));
 

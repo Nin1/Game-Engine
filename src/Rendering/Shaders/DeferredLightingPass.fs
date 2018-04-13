@@ -37,11 +37,11 @@ const vec2 POISSONDISK[4] = vec2[](
   vec2( 0.34495938, 0.29387760 )
 );
 
-// TODO: Remove this function (useful for viewing depth)
+// Debug function for displaying depth
 float GetLinearShadowMap(in vec2 uv)
 {
-    float zNear = 0.5;    // TODO: Replace by the zNear of your perspective projection
-    float zFar  = 2000.0; // TODO: Replace by the zFar  of your perspective projection
+    float zNear = 0.5;
+    float zFar  = 2000.0;
     float depth = texture2D(gShadowMap, uv).x;
     return (2.0 * zNear) / (zFar + zNear - depth * (zFar - zNear));
 }

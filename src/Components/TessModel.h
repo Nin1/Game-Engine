@@ -30,6 +30,9 @@ namespace snes
 		/** Calculate the model/view/proj matrices and apply them to the material */
 		void PrepareTransformUniforms(Camera& camera, Material* mat);
 
+		/** Return the radius of the encapsulating sphere around the mesh in screen-space */
+		float GetScreenSizeOfMesh(Camera& camera);
+
 		/** The camera to render the mesh from */
 		std::weak_ptr<Camera> m_camera;
 		static std::weak_ptr<GameObject> m_referenceObj;

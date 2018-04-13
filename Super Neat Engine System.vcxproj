@@ -32,6 +32,7 @@
     <ClInclude Include="src\Components\SphereCollider.h" />
     <ClInclude Include="src\Components\TessModel.h" />
     <ClInclude Include="src\Components\TestComponent.h" />
+    <ClInclude Include="src\Components\ToggleModel.h" />
     <ClInclude Include="src\Components\Transform.h" />
     <ClInclude Include="src\Core\Application.h" />
     <ClInclude Include="src\Core\Component.h" />
@@ -69,6 +70,7 @@
     <ClCompile Include="src\Components\SphereCollider.cpp" />
     <ClCompile Include="src\Components\TessModel.cpp" />
     <ClCompile Include="src\Components\TestComponent.cpp" />
+    <ClCompile Include="src\Components\ToggleModel.cpp" />
     <ClCompile Include="src\Components\Transform.cpp" />
     <ClCompile Include="src\Core\Application.cpp" />
     <ClCompile Include="src\Core\Component.cpp" />

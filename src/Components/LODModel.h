@@ -28,6 +28,7 @@ namespace snes
 		/** Sets the camera from which to render the mesh */
 		void SetCamera(std::weak_ptr<Camera> camera) { m_camera = camera; }
 		void SetReferenceObject(std::weak_ptr<GameObject> object) { m_referenceObj = object; }
+		void SetCurrentLOD(uint index);
 
 		void FixedLogic() override;
 		void MainLogic() override;
@@ -35,6 +36,7 @@ namespace snes
 
 		/** Return the index of the best LOD to show */
 		int GetCurrentLOD() const;
+		int GetLODCount() const { return m_meshes.size(); }
 
 		const std::weak_ptr<Mesh> GetMesh(uint lodLevel) const;
 
@@ -82,6 +84,7 @@ namespace snes
 		std::vector<std::shared_ptr<Mesh>> m_meshes;
 		std::vector<std::shared_ptr<Material>> m_materials;
 		std::vector<std::shared_ptr<Material>> m_shadowMaterials;
+		std::vector<float> m_costs;
 
 		/** Distance from camera that the lowest LOD is used */
 		float m_distanceLow = 100;

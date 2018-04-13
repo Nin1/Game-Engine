@@ -17,7 +17,7 @@ namespace snes
 		4.0f/17.0f,  12.0f/17.0f, 2.0f/17.0f,  10.0f/17.0f,
 		16.0f/17.0f, 8.0f/17.0f,  14.0f/17.0f, 6.0f/17.0f
 	};
-	const float LODModel::TRANSITION_DURATION_S = 0.5f;
+	const float LODModel::TRANSITION_DURATION_S = 0.0f;
 
 	std::vector<LODValue> LODModel::m_lodValues;
 	uint LODModel::m_instanceCount = 0;
@@ -54,6 +54,12 @@ namespace snes
 			if (mesh)
 			{
 				m_meshes.push_back(mesh);
+
+				float costCoefficient = 1;
+				float costCoefficient2 = 1;
+
+				float cost = mesh->GetNumFaces() * costCoefficient + mesh->GetVertexCount() * costCoefficient2;
+				m_costs.push_back(cost);
 			}
 
 			// Read current LOD material file
@@ -156,7 +162,7 @@ namespace snes
 		}
 
 		PrepareTransformUniforms(camera, material);
-		material->PrepareForRendering(m_transform, camera);
+		material->PrepareForRendering(m_transform, *m_camera.lock(), *m_meshes[m_lastRenderedMesh]);
 		m_meshes[m_lastRenderedMesh]->PrepareForRendering();
 
 		if (m_transitionRemainingS > 0.0f)
@@ -189,7 +195,7 @@ namespace snes
 		}
 
 		PrepareTransformUniforms(camera, material);
-		material->PrepareForRendering(m_transform, camera);
+		material->PrepareForRendering(m_transform, camera, *m_meshes[m_transitioningFromMesh]);
 		m_meshes[m_transitioningFromMesh]->PrepareForRendering();
 
 		if (m_transitionRemainingS > 0.0f)
@@ -204,7 +210,7 @@ namespace snes
 		// Draw the mesh
 		if (material->GetUsePatches())
 		{
-			glDrawElements(GL_PATCHES, m_meshes[m_transitioningFromMesh]->GetNumFaces(), GL_UNSIGNED_INT, 0);
+			glDrawArrays(GL_PATCHES, 0, m_meshes[m_transitioningFromMesh]->GetVertexCount());
 		}
 		else
 		{
@@ -292,9 +298,6 @@ namespace snes
 
 	int LODModel::CalculateEachLODValue()
 	{
-		float costCoefficient = 1;
-		float costCoefficient2 = 1;
-
 		float size = GetScreenSizeOfMesh(0);
 
 		int bestIndex = 0;
@@ -305,8 +308,6 @@ namespace snes
 			uint numFaces = m_meshes[i]->GetNumFaces();	// @TODO: Calculate a proper cost heuristic
 			uint numVertices = m_meshes[i]->GetVertexCount();
 
-			float cost = numFaces * costCoefficient + numVertices * costCoefficient2;
-
 			float baseError = 0.5f;
 			float accuracy = size / numFaces; //1.0f - ((baseError / numFaces) * (baseError / numFaces)); //1 - (BaseError / number of faces)^2
 			float importance = 1.0f;
@@ -315,9 +316,9 @@ namespace snes
 			
 			float benefit = size * accuracy * importance * focus * motion; // * hysteresis
 
-			float value = benefit / cost;
+			float value = benefit / m_costs[i];
 
-			LODValue valueEntry = { this, i, cost, value };
+			LODValue valueEntry = { this, i, m_costs[i], value };
 			m_lodValues.push_back(valueEntry);
 			// @TODO: Find the maximum "cost" for a frame, then select LODs for each model in descending order of value until the cost is completely claimed.
 			// Maybe calculate all the "value"s in MainLogic(), then do LOD selection once.
@@ -407,5 +408,16 @@ namespace snes
 
 		m_totalCost += m_shownMeshCost;
 		
+	}
+
+	void LODModel::SetCurrentLOD(uint index)
+	{
+		m_totalCost -= m_shownMeshCost;
+
+		m_currentMesh = index;
+		m_shownMeshCost = m_costs[index];
+
+		m_totalCost += m_shownMeshCost;
+
 	}
 }

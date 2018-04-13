@@ -51,7 +51,7 @@ namespace snes
 
 	public:
 		/** Returns the mesh data from the mesh at the given path */
-		static std::shared_ptr<Mesh> GetMesh(const char* modelPath);
+		static std::shared_ptr<Mesh> GetMesh(const char* modelPath, bool withNeighbourData = false);
 
 		/** Reset the number of vertices rendered this frame */
 		static void ResetRenderCount();

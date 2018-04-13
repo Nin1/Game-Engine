@@ -30,14 +30,12 @@ namespace snes
 		// Read current LOD mesh file
 		std::string line;
 		std::getline(modelFile, line);
-		m_mesh = Mesh::GetMesh(line.c_str());
+		m_mesh = Mesh::GetMesh(line.c_str(), true);
 		if (!m_mesh)
 		{
 			std::cout << "Error opening mesh file: " << line << std::endl;
 			return;
 		}
-
-		m_mesh->GenNeighbourData();
 
 		// Read current LOD material file
 		std::getline(modelFile, line);
@@ -67,8 +65,8 @@ namespace snes
 			//material = m_shadowMaterial.get();
 		}
 
-		PrepareTransformUniforms(camera, material);
-		material->PrepareForRendering(m_transform, camera);
+		this->PrepareTransformUniforms(camera, material);
+		material->PrepareForRendering(m_transform, camera, *m_mesh);
 		m_mesh->PrepareForRendering();
 
 		// Draw the mesh
@@ -100,4 +98,5 @@ namespace snes
 
 		mat->ApplyTransformUniforms(modelMat, viewMat, projMat);
 	}
+
 }
