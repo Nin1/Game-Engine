@@ -95,15 +95,15 @@ namespace snes
 			float pixelMeshRadius = normalizedMeshRadius * 1024.0f / 2.0f;
 			float circleArea = 3.14159f * (pixelMeshRadius * pixelMeshRadius);
 			int pixelsPerPolygon = (int)(circleArea / mesh.GetNumFaces());
-			float desiredTessLevel = std::fmax(1.0f, std::fmin(64, sqrt((float)pixelsPerPolygon / m_pixelsPerPolygon)));	// Max tessellation level is 64
+			float desiredOuterTessLevel = std::fmax(1.0f, std::fmin(64, sqrt((float)pixelsPerPolygon / m_pixelsPerPolygon)));	// Max tessellation level is 64
+			float desiredInnerTessLevel = std::fmax(1.0f, desiredOuterTessLevel - 1.0f);
 
+			SetUniformFloat("innerTessLevel", std::fmin(m_maxInnerTessLevel, desiredInnerTessLevel));
+			SetUniformFloat("outerTessLevel", std::fmin(m_maxOuterTessLevel, desiredOuterTessLevel));
 
-			SetUniformFloat("innerTessLevel", std::fmin(m_maxInnerTessLevel, desiredTessLevel));
-			SetUniformFloat("outerTessLevel", std::fmin(m_maxOuterTessLevel, desiredTessLevel));
+			// Adjust displacement amount based on tessellation level
 
-			// Use percentage of tess level 64 OR normalized radius, whichever is higher
-
-			float tessMultiplier = std::fmax(desiredTessLevel / 64, normalizedMeshRadius);
+			float tessMultiplier = std::fmax(desiredOuterTessLevel / 64, normalizedMeshRadius);
 			SetUniformFloat("magnitude", m_displacementMagnitude * tessMultiplier);
 		}
 		else

@@ -232,7 +232,7 @@ namespace snes
 
 		// Add character controller component
 		link->AddComponent<CharController>();
-		//link->AddComponent<TestComponent>();
+		link->AddComponent<TestComponent>();
 
 		CreatePointLight(*link, glm::vec3(0.0f), glm::vec3(1.0f));
 
